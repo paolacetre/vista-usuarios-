@@ -1,1 +1,3 @@
-*{box-sizing:border-box}html,body{margin:0;min-width:320px;background:#f8fafb}button,input{font:inherit}
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
+
+*{box-sizing:border-box}html,body{margin:0;min-width:320px;background:#f8fafb}button,input,select{font:inherit}
