@@ -1,0 +1,16 @@
+@use '../../settings-shared';
+
+.tab-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.date-format-btn {
+  position: relative;
+}
+
+.date-format-btn:has(input:focus-visible) {
+  outline: 3px solid #b9e59f;
+  outline-offset: 2px;
+}

@@ -2,17 +2,18 @@
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { PerfilComponent, ProfileData } from './perfil.component';
+import { ToastService } from '../../shared/toast/toast.service';
 
 describe('PerfilComponent', () => {
   let fixture: ComponentFixture<PerfilComponent>;
   let comp: PerfilComponent;
+  let toastService: ToastService;
 
   const mockProfile: ProfileData = {
     name: 'SENA Admin',
     email: 'admin@tdo.gov.co',
     role: 'Administrador',
     entity: 'Servicio Nacional de Aprendizaje (SENA)',
-    regional: 'Dirección General - Bogotá D.C.',
     dateJoined: '24/08/2026',
     photoUrl: ''
   };
@@ -25,6 +26,7 @@ describe('PerfilComponent', () => {
     fixture = TestBed.createComponent(PerfilComponent);
     comp = fixture.componentInstance;
     comp.profile = { ...mockProfile };
+    toastService = TestBed.inject(ToastService);
     fixture.detectChanges();
   });
 
@@ -52,6 +54,18 @@ describe('PerfilComponent', () => {
       email: 'admin.editado@tdo.gov.co'
     }));
     expect(comp.successNotice).toContain('exitosamente');
+  }));
+
+  it('should notify through the shared ToastService on successful save', fakeAsync(() => {
+    spyOn(toastService, 'success');
+
+    comp.formProfile.name = 'Admin Editado';
+    comp.formProfile.email = 'admin.editado@tdo.gov.co';
+
+    comp.save();
+    tick(300);
+
+    expect(toastService.success).toHaveBeenCalledWith('Perfil actualizado correctamente.');
   }));
 
   it('should emit cancel event when onCancel is called', () => {

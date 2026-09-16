@@ -1,0 +1,33 @@
+<section class="config-card" aria-labelledby="section-language-title">
+  <div class="card-title-row">
+    <div class="card-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></svg>
+    </div>
+    <div>
+      <h2 id="section-language-title">{{ 'language.cardTitle' | translate }}</h2>
+      <p class="card-description">{{ 'language.cardDesc' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="language-grid" role="radiogroup" [attr.aria-label]="'language.ariaLabel' | translate">
+    <button
+      *ngFor="let lang of languageOptions"
+      type="button"
+      class="language-card"
+      role="radio"
+      [class.selected]="form.controls.language.value === lang.id"
+      [attr.aria-checked]="form.controls.language.value === lang.id"
+      (click)="selectLanguage(lang.id)">
+      <span class="language-flag">{{ lang.flag }}</span>
+      <strong>{{ lang.name }}</strong>
+      <span class="language-native">{{ lang.native }}</span>
+      <span class="language-check" *ngIf="form.controls.language.value === lang.id" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+    </button>
+  </div>
+</section>
+
+<section class="config-card compact-preview-note">
+  <p>{{ 'language.selected' | translate:{ name: selectedLanguageName() } }} {{ 'language.appliesOnSave' | translate }}</p>
+</section>

@@ -1,0 +1,3 @@
+<div class="toast-stack">
+  <app-toast-item *ngFor="let toast of toasts()" [toast]="toast" (closed)="dismiss(toast.id)"></app-toast-item>
+</div>

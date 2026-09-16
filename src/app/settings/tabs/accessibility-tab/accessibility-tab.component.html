@@ -1,0 +1,50 @@
+<section class="config-card" aria-labelledby="section-accessibility-title">
+  <div class="card-title-row">
+    <div class="card-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><path d="m19 8-7-2-7 2M12 6v6M8 22l2-8M16 22l-2-8M6 12h12"/></svg>
+    </div>
+    <div>
+      <h2 id="section-accessibility-title">{{ 'accessibility.cardTitle' | translate }}</h2>
+      <p class="card-description">{{ 'accessibility.cardDesc' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="toggle-list">
+    <div class="toggle-row">
+      <div class="toggle-row-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2a10 10 0 1 0 0 20V2Z"/><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="toggle-row-text">
+        <strong>{{ 'accessibility.highContrastTitle' | translate }}</strong>
+        <span>{{ 'accessibility.highContrastDesc' | translate }}</span>
+      </div>
+      <button type="button" class="switch-control" [class.on]="form.controls.highContrast.value" (click)="toggle('highContrast')" role="switch" [attr.aria-checked]="form.controls.highContrast.value" [attr.aria-label]="'accessibility.highContrastTitle' | translate"></button>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-row-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2ZM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7Z"/></svg>
+      </div>
+      <div class="toggle-row-text">
+        <strong>{{ 'accessibility.readOnlyTitle' | translate }}</strong>
+        <span>{{ 'accessibility.readOnlyDesc' | translate }}</span>
+      </div>
+      <button type="button" class="switch-control" [class.on]="form.controls.readOnly.value" (click)="toggle('readOnly')" role="switch" [attr.aria-checked]="form.controls.readOnly.value" [attr.aria-label]="'accessibility.readOnlyTitle' | translate"></button>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-row-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+      </div>
+      <div class="toggle-row-text">
+        <strong>{{ 'accessibility.largeIconsTitle' | translate }}</strong>
+        <span>{{ 'accessibility.largeIconsDesc' | translate }}</span>
+      </div>
+      <button type="button" class="switch-control" [class.on]="form.controls.largeIcons.value" (click)="toggle('largeIcons')" role="switch" [attr.aria-checked]="form.controls.largeIcons.value" [attr.aria-label]="'accessibility.largeIconsTitle' | translate"></button>
+    </div>
+  </div>
+</section>
+
+<section class="config-card compact-preview-note">
+  <p><strong>{{ 'accessibility.tip' | translate }}</strong> {{ 'accessibility.tipDesc' | translate }}</p>
+</section>

@@ -1,13 +1,16 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../shared/toast/toast.service';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { TranslationService } from '../../shared/i18n/translation.service';
 
 export interface ProfileData {
   name: string;
   email: string;
   role: string;
   entity: string;
-  regional: string;
+  regional?: string;
   dateJoined: string;
   photoUrl: string;
 }
@@ -15,17 +18,19 @@ export interface ProfileData {
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css'
 })
 export class PerfilComponent {
+  private readonly toastService = inject(ToastService);
+  private readonly translationService = inject(TranslationService);
+
   @Input() profile: ProfileData = {
     name: 'SENA Admin',
     email: 'admin@tdo.gov.co',
     role: 'Administrador',
     entity: 'Servicio Nacional de Aprendizaje (SENA)',
-    regional: 'Dirección General - Bogotá D.C.',
     dateJoined: '24/08/2026',
     photoUrl: ''
   };
@@ -47,7 +52,7 @@ export class PerfilComponent {
     if (input.files && input.files[0]) {
       const file = input.files[0];
       if (file.size > 2 * 1024 * 1024) {
-        this.formError = 'La imagen seleccionada supera el límite máximo de 2MB.';
+        this.formError = this.translationService.translate('perfil.photoTooLarge');
         return;
       }
 
@@ -69,7 +74,7 @@ export class PerfilComponent {
     const email = this.formProfile.email.trim().toLowerCase();
 
     if (!name || !email) {
-      this.formError = 'Por favor completa el nombre y el correo institucional.';
+      this.formError = this.translationService.translate('perfil.errorRequiredFields');
       return;
     }
 
@@ -80,8 +85,9 @@ export class PerfilComponent {
       this.profile = { ...this.formProfile, name, email };
       this.profileSaved.emit(this.profile);
       this.isSaving = false;
-      this.successNotice = 'Los cambios de tu perfil se han guardado exitosamente.';
+      this.successNotice = this.translationService.translate('perfil.successBanner');
       setTimeout(() => this.successNotice = '', 3000);
+      this.toastService.success(this.translationService.translate('perfil.toastUpdated'));
     }, 300);
   }
 

@@ -2,13 +2,13 @@
   <!-- Page Heading -->
   <header class="page-heading">
     <div>
-      <p class="eyebrow">ADMINISTRACIÓN</p>
-      <h1>Configuración de Perfil</h1>
-      <p class="subtitle">Gestiona tu identidad profesional y datos institucionales en la plataforma TDO.</p>
+      <p class="eyebrow">{{ 'perfil.eyebrow' | translate }}</p>
+      <h1>{{ 'perfil.title' | translate }}</h1>
+      <p class="subtitle">{{ 'perfil.subtitle' | translate }}</p>
     </div>
     <div class="header-badge">
       <span class="status-dot"></span>
-      <span>Sesión activa: <strong>{{ profile.name }}</strong></span>
+      <span>{{ 'perfil.activeSession' | translate }} <strong>{{ profile.name }}</strong></span>
     </div>
   </header>
 
@@ -21,10 +21,10 @@
   <!-- Main 2-Column Responsive Layout -->
   <div class="profile-grid-layout">
     <!-- Left Column: Identity & Card Summary -->
-    <aside class="identity-card" aria-label="Resumen de cuenta">
+    <aside class="identity-card" [attr.aria-label]="'perfil.summaryAria' | translate">
       <div class="avatar-section">
         <div class="avatar-frame">
-          <img *ngIf="formProfile.photoUrl" [src]="formProfile.photoUrl" alt="Foto de perfil de {{ formProfile.name }}" class="avatar-image">
+          <img *ngIf="formProfile.photoUrl" [src]="formProfile.photoUrl" [alt]="'perfil.photoAlt' | translate:{ name: formProfile.name }" class="avatar-image">
           <div *ngIf="!formProfile.photoUrl" class="avatar-initials" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
@@ -33,14 +33,14 @@
         <div class="avatar-controls">
           <label class="btn-upload" tabindex="0">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span>Subir foto</span>
+            <span>{{ 'perfil.uploadPhoto' | translate }}</span>
             <input type="file" accept="image/png, image/jpeg, image/webp" class="sr-only" (change)="onPhotoSelected($event)">
           </label>
-          <button *ngIf="formProfile.photoUrl" type="button" class="btn-remove-photo" (click)="removePhoto()" title="Eliminar foto">
-            Eliminar
+          <button *ngIf="formProfile.photoUrl" type="button" class="btn-remove-photo" (click)="removePhoto()" [title]="'perfil.deletePhotoTitle' | translate">
+            {{ 'perfil.deletePhoto' | translate }}
           </button>
         </div>
-        <p class="avatar-hint">JPG, PNG o WEBP. Máximo 2MB.</p>
+        <p class="avatar-hint">{{ 'perfil.photoHint' | translate }}</p>
       </div>
 
       <div class="identity-info">
@@ -49,31 +49,31 @@
 
         <div class="pill-group">
           <span class="role-badge">{{ formProfile.role | uppercase }}</span>
-          <span class="status-badge"><i class="dot"></i> Activo</span>
+          <span class="status-badge"><i class="dot"></i> {{ 'perfil.statusActive' | translate }}</span>
         </div>
       </div>
 
-      <div class="identity-meta">
+      <dl class="identity-meta">
         <div class="meta-item">
-          <span class="meta-label">ENTIDAD</span>
-          <span class="meta-value">{{ formProfile.entity }}</span>
+          <dt class="meta-label">{{ 'perfil.entityLabel' | translate }}</dt>
+          <dd class="meta-value">{{ formProfile.entity }}</dd>
         </div>
         <div class="meta-item">
-          <span class="meta-label">FECHA DE VINCULACIÓN</span>
-          <span class="meta-value">{{ formProfile.dateJoined }}</span>
+          <dt class="meta-label">{{ 'perfil.joinDateLabel' | translate }}</dt>
+          <dd class="meta-value">{{ formProfile.dateJoined }}</dd>
         </div>
-      </div>
+      </dl>
     </aside>
 
     <!-- Right Column: Personal Information Form -->
-    <main class="form-card" aria-label="Información Personal">
+    <main class="form-card" [attr.aria-label]="'perfil.formAriaLabel' | translate">
       <div class="card-header">
         <div class="card-header-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
         <div>
-          <h2>Información Personal</h2>
-          <p class="card-subtitle">Actualiza tus datos de contacto y representación institucional.</p>
+          <h2>{{ 'perfil.formTitle' | translate }}</h2>
+          <p class="card-subtitle">{{ 'perfil.formSubtitle' | translate }}</p>
         </div>
       </div>
 
@@ -81,7 +81,7 @@
         <div class="form-fields-grid">
           <!-- Nombre Completo -->
           <div class="field-group">
-            <label for="profile-full-name">NOMBRE COMPLETO <span class="req">*</span></label>
+            <label for="profile-full-name">{{ 'perfil.fieldFullName' | translate }} <span class="req">*</span></label>
             <div class="input-wrapper">
               <input
                 id="profile-full-name"
@@ -89,13 +89,13 @@
                 [(ngModel)]="formProfile.name"
                 required
                 [disabled]="isSaving"
-                placeholder="Ej. Juan Carlos Pérez">
+                [placeholder]="'perfil.namePlaceholder' | translate">
             </div>
           </div>
 
           <!-- Correo Institucional -->
           <div class="field-group">
-            <label for="profile-inst-email">CORREO INSTITUCIONAL <span class="req">*</span></label>
+            <label for="profile-inst-email">{{ 'perfil.fieldEmail' | translate }} <span class="req">*</span></label>
             <div class="input-wrapper has-icon">
               <input
                 id="profile-inst-email"
@@ -103,16 +103,17 @@
                 type="email"
                 [(ngModel)]="formProfile.email"
                 required
+                readonly
                 [disabled]="isSaving"
-                placeholder="ejemplo@tdo.gov.co">
-              <svg class="trailing-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>
+                [placeholder]="'perfil.emailPlaceholder' | translate">
+              <svg class="trailing-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
           </div>
 
           <!-- Rol en Plataforma (Bloqueado) -->
           <div class="field-group">
-            <label>ROL EN PLATAFORMA</label>
-            <div class="locked-box" title="El rol es asignado únicamente por la administración central">
+            <label>{{ 'perfil.fieldRole' | translate }}</label>
+            <div class="locked-box" [title]="'perfil.roleLockedTitle' | translate">
               <div class="locked-box-content">
                 <span class="locked-dot"></span>
                 <strong>{{ formProfile.role }}</strong>
@@ -121,18 +122,6 @@
             </div>
           </div>
 
-          <!-- Sede / Regional -->
-          <div class="field-group">
-            <label for="profile-regional">REGIONAL / SEDE</label>
-            <div class="input-wrapper">
-              <input
-                id="profile-regional"
-                name="regional"
-                [(ngModel)]="formProfile.regional"
-                [disabled]="isSaving"
-                placeholder="Ej. Dirección General">
-            </div>
-          </div>
         </div>
 
         <p class="error-msg" *ngIf="formError" role="alert">{{ formError }}</p>
@@ -140,11 +129,11 @@
         <!-- Action Buttons -->
         <footer class="form-actions-bar">
           <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isSaving">
-            Cancelar
+            {{ 'perfil.cancel' | translate }}
           </button>
           <button type="submit" class="btn-save" [disabled]="pForm.invalid || isSaving">
             <svg *ngIf="!isSaving" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            <span>{{ isSaving ? 'Guardando cambios...' : 'Guardar Cambios' }}</span>
+            <span>{{ (isSaving ? 'perfil.savingChanges' : 'perfil.saveChanges') | translate }}</span>
           </button>
         </footer>
       </form>

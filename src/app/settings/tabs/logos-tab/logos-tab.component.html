@@ -1,0 +1,95 @@
+<section class="config-card" aria-labelledby="section-logos-title">
+  <div class="card-title-row">
+    <div class="card-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+    </div>
+    <div>
+      <h2 id="section-logos-title">{{ 'logos.cardTitle' | translate }}</h2>
+      <p class="card-description">{{ 'logos.cardDesc' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="apply-all-card">
+    <div class="apply-all-info">
+      <div class="apply-all-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+      </div>
+      <div>
+        <strong>{{ 'logos.applyAllTitle' | translate }}</strong>
+        <p class="card-description">{{ 'logos.applyAllDesc' | translate }}</p>
+      </div>
+    </div>
+    <label class="upload-btn" tabindex="0">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      <span>{{ 'logos.applyAllButton' | translate }}</span>
+      <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'all')">
+    </label>
+  </div>
+
+  <p class="logos-note" [class.error]="errorMessage()" role="status">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <span *ngIf="!errorMessage()"><strong>{{ 'logos.formatsNoteStrong' | translate }}</strong> {{ 'logos.formatsNote' | translate }}</span>
+    <span *ngIf="errorMessage()">{{ errorMessage() }}</span>
+  </p>
+</section>
+
+<div class="logo-grid">
+  <section class="config-card logo-slot-card" aria-labelledby="logo-principal-title">
+    <div class="logo-slot-head">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+      <h3 id="logo-principal-title">{{ 'logos.principalTitle' | translate }}</h3>
+    </div>
+    <p class="card-description">{{ 'logos.principalDesc' | translate }}</p>
+    <div class="logo-drop" [class.has-logo]="draft().logos.principal">
+      <img *ngIf="draft().logos.principal" [src]="draft().logos.principal" [alt]="'logos.principalTitle' | translate">
+      <span *ngIf="!draft().logos.principal" class="logo-drop-empty">{{ 'logos.empty' | translate }}</span>
+    </div>
+    <div class="logo-slot-actions">
+      <label class="upload-btn full-width" tabindex="0">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span>{{ 'logos.upload' | translate }}</span>
+        <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'principal')">
+      </label>
+      <button *ngIf="draft().logos.principal" type="button" class="remove-logo-btn" (click)="removeLogo('principal')">{{ 'logos.remove' | translate }}</button>
+    </div>
+  </section>
+
+  <section class="config-card logo-slot-card" aria-labelledby="logo-login-title">
+    <div class="logo-slot-head">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <h3 id="logo-login-title">{{ 'logos.loginTitle' | translate }}</h3>
+    </div>
+    <p class="card-description">{{ 'logos.loginDesc' | translate }}</p>
+    <div class="logo-drop" [class.has-logo]="draft().logos.login">
+      <img *ngIf="draft().logos.login" [src]="draft().logos.login" [alt]="'logos.loginTitle' | translate">
+      <span *ngIf="!draft().logos.login" class="logo-drop-empty">{{ 'logos.empty' | translate }}</span>
+    </div>
+    <div class="logo-slot-actions">
+      <label class="upload-btn full-width" tabindex="0">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span>{{ 'logos.upload' | translate }}</span>
+        <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'login')">
+      </label>
+      <button *ngIf="draft().logos.login" type="button" class="remove-logo-btn" (click)="removeLogo('login')">{{ 'logos.remove' | translate }}</button>
+    </div>
+  </section>
+</div>
+
+<section class="config-card favicon-card" aria-labelledby="logo-favicon-title">
+  <div class="favicon-preview" [class.has-logo]="draft().logos.favicon">
+    <img *ngIf="draft().logos.favicon" [src]="draft().logos.favicon" [alt]="'logos.faviconTitle' | translate">
+    <span *ngIf="!draft().logos.favicon" class="logo-drop-empty">{{ 'logos.emptyFavicon' | translate }}</span>
+  </div>
+  <div class="favicon-info">
+    <h3 id="logo-favicon-title">{{ 'logos.faviconTitle' | translate }}</h3>
+    <p class="card-description">{{ 'logos.faviconDesc' | translate }}</p>
+  </div>
+  <div class="logo-slot-actions favicon-actions">
+    <label class="upload-btn" tabindex="0">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      <span>{{ 'logos.upload' | translate }}</span>
+      <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'favicon')">
+    </label>
+    <button *ngIf="draft().logos.favicon" type="button" class="remove-logo-btn" (click)="removeLogo('favicon')">{{ 'logos.remove' | translate }}</button>
+  </div>
+</section>

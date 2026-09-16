@@ -1,37 +1,37 @@
 <section class="users-view-wrapper">
-  <div class="page-heading">
+  <header class="page-heading">
     <div>
-      <p class="eyebrow">ADMINISTRACIÓN</p>
-      <h1>Gestión de Usuarios</h1>
-      <p class="subtitle">Visualiza y administra administradores y analistas registrados en el sistema.</p>
+      <p class="eyebrow">{{ 'usuarios.eyebrow' | translate }}</p>
+      <h1>{{ 'usuarios.title' | translate }}</h1>
+      <p class="subtitle">{{ 'usuarios.subtitle' | translate }}</p>
     </div>
-    <button class="primary-button" type="button" (click)="startCreate($event)"><span class="add-icon">+</span> Agregar usuario</button>
-  </div>
+    <button class="primary-button" type="button" (click)="startCreate($event)"><span class="add-icon">+</span> {{ 'usuarios.addButton' | translate }}</button>
+  </header>
 
   <div class="overview-grid">
-    <section class="filter-card" aria-label="Filtros de usuarios">
-      <div class="search-row">
+    <section class="filter-card" [attr.aria-label]="'usuarios.filtersAriaLabel' | translate">
+      <form role="search" class="search-row" (submit)="$event.preventDefault()">
         <label class="search-box" for="user-search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
-          <input id="user-search" [(ngModel)]="searchTerm" placeholder="Buscar usuario por nombre o correo..." aria-label="Buscar usuario por nombre o correo">
+          <input id="user-search" [(ngModel)]="searchTerm" name="searchTerm" [placeholder]="'usuarios.searchPlaceholder' | translate" [attr.aria-label]="'usuarios.searchAriaLabel' | translate">
         </label>
-        <button *ngIf="searchTerm.trim()" class="clear-search" type="button" (click)="searchTerm = ''" aria-label="Limpiar búsqueda">Limpiar</button>
-      </div>
+        <button *ngIf="searchTerm.trim()" class="clear-search" type="button" (click)="searchTerm = ''" [attr.aria-label]="'usuarios.clearSearchAria' | translate">{{ 'usuarios.clear' | translate }}</button>
+      </form>
 
       <div class="active-filters" *ngIf="hasActiveFilters" aria-live="polite">
-        <button type="button" class="filter-tag-btn" *ngIf="searchTerm.trim()" (click)="searchTerm = ''" title="Quitar filtro de búsqueda" aria-label="Quitar filtro de búsqueda">Buscar: {{ searchTerm.trim() }} <span class="tag-close" aria-hidden="true">&times;</span></button>
-        <button type="button" class="filter-tag-btn" *ngIf="selectedRole !== 'Todos'" (click)="setRole('Todos')" title="Quitar filtro de rol" aria-label="Quitar filtro de rol">Rol: {{ selectedRole }} <span class="tag-close" aria-hidden="true">&times;</span></button>
-        <button type="button" class="filter-tag-btn" *ngIf="selectedStatus !== 'Todos'" (click)="setStatus('Todos')" title="Quitar filtro de estado" aria-label="Quitar filtro de estado">Estado: {{ selectedStatus }} <span class="tag-close" aria-hidden="true">&times;</span></button>
+        <button type="button" class="filter-tag-btn" *ngIf="searchTerm.trim()" (click)="searchTerm = ''" [title]="'usuarios.removeSearchFilter' | translate" [attr.aria-label]="'usuarios.removeSearchFilter' | translate">{{ 'usuarios.searchFilterLabel' | translate:{ term: searchTerm.trim() } }} <span class="tag-close" aria-hidden="true">&times;</span></button>
+        <button type="button" class="filter-tag-btn" *ngIf="selectedRole !== 'Todos'" (click)="setRole('Todos')" [title]="'usuarios.removeRoleFilter' | translate" [attr.aria-label]="'usuarios.removeRoleFilter' | translate">{{ 'usuarios.roleFilterLabel' | translate:{ role: roleBadgeLabel(selectedRole) } }} <span class="tag-close" aria-hidden="true">&times;</span></button>
+        <button type="button" class="filter-tag-btn" *ngIf="selectedStatus !== 'Todos'" (click)="setStatus('Todos')" [title]="'usuarios.removeStatusFilter' | translate" [attr.aria-label]="'usuarios.removeStatusFilter' | translate">{{ 'usuarios.statusFilterLabel' | translate:{ status: statusLabel(selectedStatus) } }} <span class="tag-close" aria-hidden="true">&times;</span></button>
       </div>
 
       <div class="filter-groups">
         <div class="filter-group-container">
-          <span class="filter-section-title">ROL</span>
+          <span class="filter-section-title">{{ 'usuarios.roleSectionTitle' | translate }}</span>
           <fieldset class="filter-group">
-            <legend class="sr-only">Filtrar por rol</legend>
+            <legend class="sr-only">{{ 'usuarios.filterByRole' | translate }}</legend>
             <div class="segmented">
               <button *ngFor="let role of roles" type="button" [class.active]="selectedRole === role" [attr.aria-pressed]="selectedRole === role" (click)="setRole(role)">
-                <span>{{ role === 'Admin' ? 'Administradores' : role + (role === 'Analista' ? 's' : '') }}</span>
+                <span>{{ roleFilterLabel(role) }}</span>
                 <span class="count-pill">{{ role === 'Todos' ? users.length : countBy('role', role) }}</span>
               </button>
             </div>
@@ -39,12 +39,12 @@
         </div>
 
         <div class="filter-group-container">
-          <span class="filter-section-title">ESTADO</span>
+          <span class="filter-section-title">{{ 'usuarios.statusSectionTitle' | translate }}</span>
           <fieldset class="filter-group">
-            <legend class="sr-only">Filtrar por estado</legend>
+            <legend class="sr-only">{{ 'usuarios.filterByStatus' | translate }}</legend>
             <div class="segmented">
               <button *ngFor="let status of statuses" type="button" [class.active]="selectedStatus === status" [attr.aria-pressed]="selectedStatus === status" (click)="setStatus(status)">
-                <span>{{ status }}</span>
+                <span>{{ statusLabel(status) }}</span>
                 <span class="count-pill">{{ status === 'Todos' ? users.length : countBy('status', status) }}</span>
               </button>
             </div>
@@ -53,8 +53,8 @@
       </div>
 
       <div class="filter-footer" *ngIf="hasActiveFilters">
-        <span>{{ filtersCount }} filtro{{ filtersCount > 1 ? 's' : '' }} activo{{ filtersCount > 1 ? 's' : '' }}</span>
-        <button type="button" class="ghost-button" (click)="clearFilters()">Reiniciar filtros</button>
+        <span>{{ 'usuarios.activeFiltersCount' | translate:{ count: filtersCount, s: filtersCount > 1 ? 's' : '' } }}</span>
+        <button type="button" class="ghost-button" (click)="clearFilters()">{{ 'usuarios.resetFilters' | translate }}</button>
       </div>
     </section>
 
@@ -64,38 +64,38 @@
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div>
-          <p class="eyebrow light">TOTAL USUARIOS</p>
+          <p class="eyebrow light">{{ 'usuarios.totalUsersEyebrow' | translate }}</p>
           <p class="result-copy">
-            {{ hasActiveFilters ? (filteredUsers.length + ' de ' + users.length + ' encontrados') : 'Todos los usuarios registrados' }}
+            {{ hasActiveFilters ? ('usuarios.resultsFound' | translate:{ shown: filteredUsers.length, total: users.length }) : ('usuarios.allUsersRegistered' | translate) }}
           </p>
         </div>
       </div>
       <div class="results-main">
         <strong class="results-count">{{ filteredUsers.length }}</strong>
         <span class="results-badge" *ngIf="hasActiveFilters" [class.filtered]="filteredUsers.length !== users.length">
-          {{ filteredUsers.length === 0 ? 'Sin coincidencias' : (filteredUsers.length + ' filtrado' + (filteredUsers.length > 1 ? 's' : '')) }}
+          {{ filteredUsers.length === 0 ? ('usuarios.noMatches' | translate) : ('usuarios.filteredCount' | translate:{ count: filteredUsers.length, s: filteredUsers.length > 1 ? 's' : '' }) }}
         </span>
       </div>
     </aside>
   </div>
 
-  <section class="users-table" aria-label="Usuarios registrados" [attr.aria-busy]="isLoading">
+  <section class="users-table" [attr.aria-label]="'usuarios.tableAriaLabel' | translate" [attr.aria-busy]="isLoading">
     <table>
-      <caption class="sr-only">Usuarios registrados</caption>
-      <thead class="table-head"><tr><th scope="col">USUARIO</th><th scope="col">CORREO</th><th scope="col">ROL</th><th scope="col">ESTADO</th><th scope="col">ACCIONES</th></tr></thead>
+      <caption class="sr-only">{{ 'usuarios.tableAriaLabel' | translate }}</caption>
+      <thead class="table-head"><tr><th scope="col">{{ 'usuarios.colUser' | translate }}</th><th scope="col">{{ 'usuarios.colEmail' | translate }}</th><th scope="col">{{ 'usuarios.colRole' | translate }}</th><th scope="col">{{ 'usuarios.colStatus' | translate }}</th><th scope="col">{{ 'usuarios.colActions' | translate }}</th></tr></thead>
       <tbody *ngIf="!isLoading && !loadError && filteredUsers.length">
         <tr class="user-row" *ngFor="let user of filteredUsers; trackBy: trackUserById">
           <td><div class="user-cell"><div class="avatar" aria-hidden="true">{{ user.initials }}</div><div><strong>{{ user.name }}</strong><small>{{ user.date }}</small></div></div></td>
           <td class="email">{{ user.email }}</td>
-          <td><span class="role-pill" [class.analyst]="user.role === 'Analista'">{{ user.role | uppercase }}</span></td>
-          <td><span class="status-pill" [class.inactive]="user.status === 'Inactivo'"><i></i>{{ user.status }}</span></td>
-          <td><div class="row-actions"><button type="button" title="Editar usuario" [disabled]="isUserPending(user)" [attr.aria-label]="'Editar a ' + user.name" (click)="startEdit(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg></button><button class="access" type="button" title="Restablecer acceso" [disabled]="isUserPending(user)" [attr.aria-label]="'Restablecer acceso de ' + user.name" (click)="requestResetAccess(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="3"/><path d="M10.2 12.8 19 4m-3 0h3v3m-7.7 7.7 2 2"/></svg></button><button class="status-action" type="button" title="Activar o desactivar usuario" [disabled]="isUserPending(user)" [attr.aria-label]="(user.status === 'Activo' ? 'Desactivar a ' : 'Activar a ') + user.name" (click)="requestStatusChange(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2M18 9V5h-4M6 15v4h4"/></svg></button><button class="danger" type="button" title="Eliminar usuario" [disabled]="isUserPending(user)" [attr.aria-label]="'Eliminar a ' + user.name" (click)="requestDelete(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M9 7V4h6v3m-9 0 1 14h10l1-14"/></svg></button></div></td>
+          <td><span class="role-pill" [class.analyst]="user.role === 'Analista'">{{ roleBadgeLabel(user.role) | uppercase }}</span></td>
+          <td><span class="status-pill" [class.inactive]="user.status === 'Inactivo'"><i></i>{{ statusLabel(user.status) }}</span></td>
+          <td><div class="row-actions"><button class="edit-btn" type="button" [title]="'usuarios.editTitle' | translate" [disabled]="isUserPending(user)" [attr.aria-label]="'usuarios.editAria' | translate:{ name: user.name }" (click)="startEdit(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg></button><button class="access" type="button" [title]="'usuarios.resetAccessTitle' | translate" [disabled]="isUserPending(user)" [attr.aria-label]="'usuarios.resetAccessAria' | translate:{ name: user.name }" (click)="requestResetAccess(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="3"/><path d="M10.2 12.8 19 4m-3 0h3v3m-7.7 7.7 2 2"/></svg></button><button class="status-action" type="button" [title]="'usuarios.toggleStatusTitle' | translate" [disabled]="isUserPending(user)" [attr.aria-label]="(user.status === 'Activo' ? 'usuarios.deactivateAria' : 'usuarios.activateAria') | translate:{ name: user.name }" (click)="requestStatusChange(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2M18 9V5h-4M6 15v4h4"/></svg></button><button class="danger" type="button" [title]="'usuarios.deleteTitle' | translate" [disabled]="isUserPending(user)" [attr.aria-label]="'usuarios.deleteAria' | translate:{ name: user.name }" (click)="requestDelete(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M9 7V4h6v3m-9 0 1 14h10l1-14"/></svg></button></div></td>
         </tr>
       </tbody>
-      <tbody *ngIf="isLoading"><tr><td class="empty-state" colspan="5"><strong>Cargando usuarios...</strong><p>Estamos actualizando la lista de usuarios.</p></td></tr></tbody>
-      <tbody *ngIf="loadError"><tr><td class="empty-state" colspan="5" role="alert"><strong>No fue posible cargar los usuarios.</strong><p>{{ loadError }}</p><button class="ghost-button" type="button" (click)="retryLoad()">Reintentar</button></td></tr></tbody>
-      <tbody *ngIf="isCompletelyEmpty"><tr><td class="empty-state" colspan="5"><strong>Aún no hay usuarios registrados.</strong><p>Agrega un usuario para comenzar a administrar el acceso al sistema.</p><button class="ghost-button" type="button" (click)="startCreate($event)">Agregar usuario</button></td></tr></tbody>
-      <tbody *ngIf="isFilteredEmpty"><tr><td class="empty-state" colspan="5"><strong>No hay usuarios que coincidan con los filtros.</strong><p>Prueba con otra búsqueda o reinicia los filtros para volver a ver toda la lista.</p><button class="ghost-button" type="button" (click)="clearFilters()">Ver todos</button></td></tr></tbody>
+      <tbody *ngIf="isLoading"><tr><td class="empty-state" colspan="5"><strong>{{ 'usuarios.loadingTitle' | translate }}</strong><p>{{ 'usuarios.loadingDesc' | translate }}</p></td></tr></tbody>
+      <tbody *ngIf="loadError"><tr><td class="empty-state" colspan="5" role="alert"><strong>{{ 'usuarios.loadErrorTitle' | translate }}</strong><p>{{ loadError }}</p><button class="ghost-button" type="button" (click)="retryLoad()">{{ 'usuarios.retry' | translate }}</button></td></tr></tbody>
+      <tbody *ngIf="isCompletelyEmpty"><tr><td class="empty-state" colspan="5"><strong>{{ 'usuarios.emptyTitle' | translate }}</strong><p>{{ 'usuarios.emptyDesc' | translate }}</p><button class="ghost-button" type="button" (click)="startCreate($event)">{{ 'usuarios.addButton' | translate }}</button></td></tr></tbody>
+      <tbody *ngIf="isFilteredEmpty"><tr><td class="empty-state" colspan="5"><strong>{{ 'usuarios.filteredEmptyTitle' | translate }}</strong><p>{{ 'usuarios.filteredEmptyDesc' | translate }}</p><button class="ghost-button" type="button" (click)="clearFilters()">{{ 'usuarios.viewAll' | translate }}</button></td></tr></tbody>
     </table>
   </section>
 
@@ -104,37 +104,37 @@
     <section #userFormDialog class="confirm-dialog form-dialog" role="dialog" aria-modal="true" aria-labelledby="user-form-title" aria-describedby="user-form-description" tabindex="-1" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <div>
-          <h2 id="user-form-title">{{ editingUserId === null ? 'Nuevo usuario' : 'Editar usuario' }}</h2>
-          <p id="user-form-description">{{ editingUserId === null ? 'Completa la información para registrar un nuevo usuario.' : 'Actualiza la información del usuario y guarda los cambios.' }}</p>
+          <h2 id="user-form-title">{{ (editingUserId === null ? 'usuarios.newUserTitle' : 'usuarios.editTitle') | translate }}</h2>
+          <p id="user-form-description">{{ (editingUserId === null ? 'usuarios.newUserDesc' : 'usuarios.editUserDesc') | translate }}</p>
         </div>
-        <button type="button" class="close-dialog-btn" (click)="closeForm()" title="Cerrar modal" aria-label="Cerrar modal">&times;</button>
+        <button type="button" class="close-dialog-btn" (click)="closeForm()" [title]="'usuarios.closeModal' | translate" [attr.aria-label]="'usuarios.closeModal' | translate">&times;</button>
       </div>
       <form class="modal-form-body" (ngSubmit)="saveUser()" #userForm="ngForm">
         <div class="form-grid">
           <div class="field-item">
-            <label for="form-name">Nombre completo <span class="required-star">*</span></label>
-            <input id="form-name" #userNameInput name="name" [(ngModel)]="formUser.name" required [disabled]="isFormPending" placeholder="Ej. Juan Pérez">
+            <label for="form-name">{{ 'usuarios.fieldFullName' | translate }} <span class="required-star">*</span></label>
+            <input id="form-name" #userNameInput name="name" [(ngModel)]="formUser.name" required [disabled]="isFormPending" [placeholder]="'usuarios.namePlaceholder' | translate">
           </div>
           <div class="field-item">
-            <label for="form-email">Correo electrónico <span class="required-star">*</span></label>
-            <input id="form-email" name="email" type="email" [(ngModel)]="formUser.email" required [disabled]="isFormPending" placeholder="correo@ejemplo.com">
+            <label for="form-email">{{ 'usuarios.fieldEmail' | translate }} <span class="required-star">*</span></label>
+            <input id="form-email" name="email" type="email" [(ngModel)]="formUser.email" required [disabled]="isFormPending" [placeholder]="'usuarios.emailPlaceholder' | translate">
           </div>
           <div class="field-item">
-            <label for="form-password">Contraseña <span *ngIf="editingUserId === null" class="required-star">*</span><span *ngIf="editingUserId !== null" class="optional-tag">(opcional)</span></label>
-            <input id="form-password" name="password" type="password" [(ngModel)]="formUser.password" [required]="editingUserId === null" [disabled]="isFormPending" [placeholder]="editingUserId === null ? 'Ingresa la contraseña' : 'Nueva contraseña (opcional)'">
+            <label for="form-password">{{ 'usuarios.fieldPassword' | translate }} <span *ngIf="editingUserId === null" class="required-star">*</span><span *ngIf="editingUserId !== null" class="optional-tag">{{ 'usuarios.optional' | translate }}</span></label>
+            <input id="form-password" name="password" type="password" [(ngModel)]="formUser.password" [required]="editingUserId === null" [disabled]="isFormPending" [placeholder]="(editingUserId === null ? 'usuarios.passwordPlaceholderNew' : 'usuarios.passwordPlaceholderEdit') | translate">
           </div>
           <div class="field-item">
-            <label for="form-role">Rol del usuario</label>
+            <label for="form-role">{{ 'usuarios.fieldRole' | translate }}</label>
             <select id="form-role" name="role" [(ngModel)]="formUser.role" [disabled]="isFormPending">
-              <option value="Admin">Administrador</option>
-              <option value="Analista">Analista</option>
+              <option value="Admin">{{ 'usuarios.roleOptionAdmin' | translate }}</option>
+              <option value="Analista">{{ 'usuarios.roleOptionAnalyst' | translate }}</option>
             </select>
           </div>
         </div>
         <p class="form-error" *ngIf="formError" role="alert">{{ formError }}</p>
         <div class="dialog-actions form-actions">
-          <button class="secondary-button" type="button" (click)="closeForm()" [disabled]="isFormPending">Cancelar</button>
-          <button class="save-button" type="submit" [disabled]="userForm.invalid || isFormPending">{{ isFormPending ? 'Guardando...' : 'Guardar' }}</button>
+          <button class="secondary-button" type="button" (click)="closeForm()" [disabled]="isFormPending">{{ 'usuarios.cancel' | translate }}</button>
+          <button class="save-button" type="submit" [disabled]="userForm.invalid || isFormPending">{{ (isFormPending ? 'usuarios.saving' : 'usuarios.save') | translate }}</button>
         </div>
       </form>
     </section>
@@ -148,17 +148,16 @@
           <svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="3"/><path d="M10.2 12.8 19 4m-3 0h3v3m-7.7 7.7 2 2"/></svg>
         </div>
         <div class="alert-dialog-titles">
-          <h2 id="reset-access-dialog-title">Restablecer acceso</h2>
+          <h2 id="reset-access-dialog-title">{{ 'usuarios.resetAccessTitle' | translate }}</h2>
           <p id="reset-access-dialog-description">
-            ¿Deseas restablecer el acceso para <strong>&quot;{{ pendingResetAccess.name }}&quot;</strong> ({{ pendingResetAccess.email }})?
-            Se enviará una notificación con instrucciones para restablecer sus credenciales.
+            {{ 'usuarios.resetAccessDesc' | translate:{ name: pendingResetAccess.name, email: pendingResetAccess.email } }}
           </p>
         </div>
       </div>
       <div class="dialog-actions">
-        <button #cancelResetAccessButton type="button" class="secondary-button" (click)="cancelResetAccess()" [disabled]="isResetAccessPending">Cancelar</button>
+        <button #cancelResetAccessButton type="button" class="secondary-button" (click)="cancelResetAccess()" [disabled]="isResetAccessPending">{{ 'usuarios.cancel' | translate }}</button>
         <button class="reset-confirm-btn" type="button" (click)="confirmResetAccess()" [disabled]="isResetAccessPending">
-          {{ isResetAccessPending ? 'Restableciendo...' : 'Restablecer acceso' }}
+          {{ (isResetAccessPending ? 'usuarios.resettingAccess' : 'usuarios.resetAccessConfirm') | translate }}
         </button>
       </div>
     </section>
@@ -173,17 +172,16 @@
           <svg *ngIf="pendingStatusChange.status === 'Inactivo'" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
         </div>
         <div class="alert-dialog-titles">
-          <h2 id="status-dialog-title">Cambiar estado de usuario</h2>
+          <h2 id="status-dialog-title">{{ 'usuarios.statusChangeTitle' | translate }}</h2>
           <p id="status-dialog-description">
-            ¿Deseas {{ pendingStatusChange.status === 'Activo' ? 'desactivar' : 'activar' }} a <strong>&quot;{{ pendingStatusChange.name }}&quot;</strong>?
-            El usuario pasará a estar <strong>{{ pendingStatusChange.status === 'Activo' ? 'Inactivo' : 'Activo' }}</strong> en el sistema.
+            {{ (pendingStatusChange.status === 'Activo' ? 'usuarios.statusChangeDescDeactivate' : 'usuarios.statusChangeDescActivate') | translate:{ name: pendingStatusChange.name } }}
           </p>
         </div>
       </div>
       <div class="dialog-actions">
-        <button #cancelStatusButton type="button" class="secondary-button" (click)="cancelStatusChange()" [disabled]="isStatusPending">Cancelar</button>
+        <button #cancelStatusButton type="button" class="secondary-button" (click)="cancelStatusChange()" [disabled]="isStatusPending">{{ 'usuarios.cancel' | translate }}</button>
         <button class="status-confirm-btn" [class.danger]="pendingStatusChange.status === 'Activo'" [class.activate]="pendingStatusChange.status === 'Inactivo'" type="button" (click)="confirmStatusChange()" [disabled]="isStatusPending">
-          {{ isStatusPending ? 'Cambiando estado...' : (pendingStatusChange.status === 'Activo' ? 'Desactivar usuario' : 'Activar usuario') }}
+          {{ (isStatusPending ? 'usuarios.changingStatus' : (pendingStatusChange.status === 'Activo' ? 'usuarios.deactivateUser' : 'usuarios.activateUser')) | translate }}
         </button>
       </div>
     </section>
@@ -197,13 +195,13 @@
           <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
         </div>
         <div class="alert-dialog-titles">
-          <h2 id="delete-dialog-title">Eliminar usuario</h2>
-          <p id="delete-dialog-description">¿Deseas eliminar permanentemente a <strong>&quot;{{ pendingDeletion.name }}&quot;</strong>? Esta acción no se puede deshacer.</p>
+          <h2 id="delete-dialog-title">{{ 'usuarios.deleteTitle' | translate }}</h2>
+          <p id="delete-dialog-description">{{ 'usuarios.deleteUserDesc' | translate:{ name: pendingDeletion.name } }}</p>
         </div>
       </div>
       <div class="dialog-actions">
-        <button #cancelDeleteButton type="button" class="secondary-button" (click)="cancelDelete()" [disabled]="isDeletePending">Cancelar</button>
-        <button class="danger-btn" type="button" (click)="confirmDelete()" [disabled]="isDeletePending">{{ isDeletePending ? 'Eliminando...' : 'Eliminar usuario' }}</button>
+        <button #cancelDeleteButton type="button" class="secondary-button" (click)="cancelDelete()" [disabled]="isDeletePending">{{ 'usuarios.cancel' | translate }}</button>
+        <button class="danger-btn" type="button" (click)="confirmDelete()" [disabled]="isDeletePending">{{ (isDeletePending ? 'usuarios.deleting' : 'usuarios.deleteTitle') | translate }}</button>
       </div>
     </section>
   </div>

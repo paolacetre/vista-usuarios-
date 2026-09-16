@@ -1,3 +1,151 @@
-@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&display=swap');
 
-*{box-sizing:border-box}html,body{margin:0;min-width:320px;background:#f8fafb}button,input,select{font:inherit}
+:root {
+  --primary-color: #193b73;
+  --primary-color-hover: #102c5b;
+  --primary-color-light: #193b7318;
+  --primary-color-dark: #001f5b;
+  --primary-color-soft: rgba(25, 59, 115, 0.14);
+  --accent-color: #49b009;
+  --accent-color-hover: #2e8e00;
+  --accent-color-soft: rgba(73, 176, 9, 0.2);
+  --app-font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --app-font-size: 15px;
+  --border-radius: 12px;
+  --density-space: 1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-width: 320px;
+  background: #f8fafb;
+  font-family: var(--app-font-family);
+  font-size: var(--app-font-size);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* The density scale is applied globally after saving the configuration. */
+:root[data-density="compacta"] .content {
+  padding-top: 18px;
+  padding-bottom: 30px;
+}
+
+:root[data-density="compacta"] .filter-card,
+:root[data-density="compacta"] .users-table,
+:root[data-density="compacta"] .identity-card,
+:root[data-density="compacta"] .form-card {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+:root[data-density="compacta"] .user-row td {
+  height: 68px;
+}
+
+:root[data-density="compacta"] .config-card {
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
+:root[data-density="amplia"] .content {
+  padding-top: 36px;
+  padding-bottom: 60px;
+}
+
+:root[data-density="amplia"] .config-card,
+:root[data-density="amplia"] .filter-card,
+:root[data-density="amplia"] .results-card,
+:root[data-density="amplia"] .users-table,
+:root[data-density="amplia"] .identity-card,
+:root[data-density="amplia"] .form-card {
+  margin-bottom: 4px;
+}
+
+/* Saved visual tokens are shared by existing screens. */
+:root[data-density="compacta"] .topbar {
+  height: 60px;
+}
+
+:root[data-density="amplia"] .topbar {
+  height: 78px;
+}
+
+:root[data-density="compacta"] .primary-button,
+:root[data-density="compacta"] .btn-save,
+:root[data-density="compacta"] .save-button {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+:root[data-density="amplia"] .primary-button,
+:root[data-density="amplia"] .btn-save,
+:root[data-density="amplia"] .save-button {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+:root[data-density="compacta"] .config-card,
+:root[data-density="compacta"] .filter-card,
+:root[data-density="compacta"] .results-card,
+:root[data-density="compacta"] .users-table,
+:root[data-density="compacta"] .identity-card,
+:root[data-density="compacta"] .form-card {
+  border-radius: max(4px, calc(var(--border-radius) - 4px));
+}
+
+:root[data-density="amplia"] .config-card,
+:root[data-density="amplia"] .filter-card,
+:root[data-density="amplia"] .results-card,
+:root[data-density="amplia"] .users-table,
+:root[data-density="amplia"] .identity-card,
+:root[data-density="amplia"] .form-card {
+  border-radius: calc(var(--border-radius) + 2px);
+}
+
+:root[data-density="compacta"] .primary-button,
+:root[data-density="compacta"] .btn-save,
+:root[data-density="compacta"] .save-button {
+  min-height: 36px;
+}
+
+.shell .primary-button,
+.shell .btn-save,
+.shell .save-button {
+  background: var(--accent-color);
+}
+
+.shell .primary-button:hover,
+.shell .btn-save:hover:not(:disabled),
+.shell .save-button:hover:not(:disabled) {
+  background: var(--accent-color-hover);
+}
+
+.shell .nav-tab.active,
+.shell .role-pill,
+.shell .results-icon {
+  color: var(--primary-color);
+}
+
+.shell .nav-tab.active {
+  border-color: var(--primary-color-light);
+}

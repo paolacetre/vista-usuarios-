@@ -1,0 +1,89 @@
+<section class="settings-wrapper">
+  <header class="settings-header">
+    <p class="eyebrow">{{ 'settings.eyebrow' | translate }}</p>
+    <h1>{{ 'settings.title' | translate }}</h1>
+    <p class="subtitle">{{ 'settings.subtitle' | translate }}</p>
+  </header>
+
+  <nav class="settings-tabs" [attr.aria-label]="'settings.tabsAriaLabel' | translate">
+    <button
+      *ngFor="let tab of tabs"
+      type="button"
+      [class.active]="activeTab() === tab.id"
+      [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
+      (click)="selectTab(tab.id)">
+      <span class="tab-icon" aria-hidden="true">{{ tab.icon }}</span>
+      {{ tab.labelKey | translate }}
+    </button>
+  </nav>
+
+  <div class="settings-body">
+    <app-appearance-tab *ngIf="activeTab() === 'apariencia'"></app-appearance-tab>
+    <app-logos-tab *ngIf="activeTab() === 'logos'"></app-logos-tab>
+    <app-language-tab *ngIf="activeTab() === 'idioma'"></app-language-tab>
+    <app-accessibility-tab *ngIf="activeTab() === 'accesibilidad'"></app-accessibility-tab>
+    <app-preferences-tab *ngIf="activeTab() === 'preferencias'"></app-preferences-tab>
+    <app-about-tab *ngIf="activeTab() === 'acerca'"></app-about-tab>
+  </div>
+
+  <footer class="settings-footer">
+    <div class="status-text">
+      <span class="status-dot" [class.dirty]="isDirty()" aria-hidden="true"></span>
+      <span>{{ (isDirty() ? 'settings.dirty' : 'settings.clean') | translate }}</span>
+    </div>
+    <div class="footer-actions">
+      <button type="button" class="secondary-btn" (click)="requestReset()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 1 3 6.7M3 12v6h6"/></svg>
+        {{ 'settings.reset' | translate }}
+      </button>
+      <button type="button" class="save-primary-btn" [disabled]="!isDirty()" (click)="requestSave()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        {{ 'settings.save' | translate }}
+      </button>
+    </div>
+  </footer>
+
+  <!-- Confirmación de guardado: mismo patrón visual que "Eliminar"/"Cambio de estado" en Usuarios -->
+  <div class="dialog-backdrop" *ngIf="pendingSave()" (click)="cancelSave()">
+    <section class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="save-dialog-title" aria-describedby="save-dialog-description" tabindex="-1" (click)="$event.stopPropagation()">
+      <div class="alert-dialog-header">
+        <div class="dialog-icon activate-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="alert-dialog-titles">
+          <h2 id="save-dialog-title">{{ 'settings.saveDialogTitle' | translate }}</h2>
+          <p id="save-dialog-description">
+            {{ 'settings.saveDialogDesc' | translate:{ strongOpen: '', strongClose: '' } }}
+          </p>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="secondary-button" (click)="cancelSave()" [disabled]="isSavePending">{{ 'settings.cancel' | translate }}</button>
+        <button class="status-confirm-btn activate" type="button" (click)="confirmSave()" [disabled]="isSavePending">
+          {{ (isSavePending ? 'settings.saving' : 'settings.save') | translate }}
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Confirmación de restablecer: mismo patrón, icono "reset" como en Usuarios -->
+  <div class="dialog-backdrop" *ngIf="pendingReset()" (click)="cancelReset()">
+    <section class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title" aria-describedby="reset-dialog-description" tabindex="-1" (click)="$event.stopPropagation()">
+      <div class="alert-dialog-header">
+        <div class="dialog-icon reset-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 3 6.7M3 12v6h6"/></svg>
+        </div>
+        <div class="alert-dialog-titles">
+          <h2 id="reset-dialog-title">{{ 'settings.resetDialogTitle' | translate }}</h2>
+          <p id="reset-dialog-description">
+            {{ 'settings.resetDialogDesc' | translate }}
+          </p>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="secondary-button" (click)="cancelReset()">{{ 'settings.cancel' | translate }}</button>
+        <button class="reset-confirm-btn" type="button" (click)="confirmReset()">{{ 'settings.resetConfirm' | translate }}</button>
+      </div>
+    </section>
+  </div>
+</section>

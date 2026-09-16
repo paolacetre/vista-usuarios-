@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, ViewChild, inject } from '@angular/core';
+import { ToastService } from '../../shared/toast/toast.service';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { TranslationService } from '../../shared/i18n/translation.service';
 
 export type UserRole = 'Admin' | 'Analista';
 export type UserStatus = 'Activo' | 'Inactivo';
@@ -26,7 +29,7 @@ export interface UserDraft {
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.css'
 })
@@ -45,7 +48,8 @@ export class UsuariosComponent {
     { id: 2, name: 'Analista TDO', email: 'analista@tdo.gov.co', password: 'Analista*Password2026', role: 'Analista', status: 'Activo', date: '24/08/2026', initials: 'AT' },
   ];
 
-  @Output() noticeTriggered = new EventEmitter<{ message: string; type: 'success' | 'error' }>();
+  private readonly toastService = inject(ToastService);
+  private readonly translationService = inject(TranslationService);
 
   readonly roles = ['Todos', 'Analista', 'Admin'] as const;
   readonly statuses = ['Todos', 'Activo', 'Inactivo'] as const;
@@ -108,11 +112,29 @@ export class UsuariosComponent {
     return this.users.filter((user) => user[field] === value).length;
   }
 
+  /** Etiqueta singular para el badge de rol en la tabla (Admin/Analista). */
+  roleBadgeLabel(role: string): string {
+    return this.translationService.translate(role === 'Admin' ? 'usuarios.roleAdmin' : 'usuarios.roleAnalyst');
+  }
+
+  /** Etiqueta plural para los botones de filtro por rol (Administradores/Analistas/Todos). */
+  roleFilterLabel(role: string): string {
+    if (role === 'Admin') return this.translationService.translate('usuarios.roleAdmins');
+    if (role === 'Analista') return this.translationService.translate('usuarios.roleAnalysts');
+    return this.translationService.translate('usuarios.roleAll');
+  }
+
+  statusLabel(status: string): string {
+    if (status === 'Activo') return this.translationService.translate('usuarios.statusActive');
+    if (status === 'Inactivo') return this.translationService.translate('usuarios.statusInactive');
+    return this.translationService.translate('usuarios.statusAll');
+  }
+
   clearFilters() {
     this.searchTerm = '';
     this.selectedRole = 'Todos';
     this.selectedStatus = 'Todos';
-    this.emitNotice('Filtros reiniciados.');
+    this.emitNotice(this.translationService.translate('usuarios.toastFiltersReset'));
   }
 
   setRole(role: string) {
@@ -124,7 +146,11 @@ export class UsuariosComponent {
   }
 
   emitNotice(message: string, type: 'success' | 'error' = 'success') {
-    this.noticeTriggered.emit({ message, type });
+    if (type === 'error') {
+      this.toastService.error(message);
+    } else {
+      this.toastService.success(message);
+    }
   }
 
   retryLoad() {
@@ -133,7 +159,7 @@ export class UsuariosComponent {
 
     setTimeout(() => {
       this.isLoading = false;
-      this.emitNotice('La lista de usuarios se actualizó.');
+      this.emitNotice(this.translationService.translate('usuarios.toastListUpdated'));
     }, 250);
   }
 
@@ -181,18 +207,18 @@ export class UsuariosComponent {
     const password = this.formUser.password?.trim() || '';
 
     if (!name || !email) {
-      this.formError = 'Completa el nombre y el correo para continuar.';
+      this.formError = this.translationService.translate('usuarios.validationNameEmail');
       return;
     }
 
     if (this.editingUserId === null && !password) {
-      this.formError = 'Ingresa una contraseña para el nuevo usuario.';
+      this.formError = this.translationService.translate('usuarios.validationPassword');
       return;
     }
 
     const duplicateEmail = this.users.some((user) => user.email.toLowerCase() === email && user.id !== this.editingUserId);
     if (duplicateEmail) {
-      this.formError = 'Ya existe un usuario registrado con ese correo.';
+      this.formError = this.translationService.translate('usuarios.validationDuplicateEmail');
       return;
     }
 
@@ -212,11 +238,11 @@ export class UsuariosComponent {
             initials: this.initialsFor(name),
           };
           this.users = [...this.users, user];
-          this.emitNotice(`Usuario "${user.name}" creado correctamente.`);
+          this.emitNotice(this.translationService.translate('usuarios.toastUserCreated', { name: user.name }));
         } else {
           const user = this.users.find((item) => item.id === this.editingUserId);
           if (!user) {
-            throw new Error('El usuario ya no está disponible.');
+            throw new Error(this.translationService.translate('usuarios.errorUserGone'));
           }
           const updatedUser: Partial<User> = {
             name,
@@ -228,12 +254,12 @@ export class UsuariosComponent {
             updatedUser.password = password;
           }
           Object.assign(user, updatedUser);
-          this.emitNotice(`Usuario "${user.name}" actualizado correctamente.`);
+          this.emitNotice(this.translationService.translate('usuarios.toastUserUpdated', { name: user.name }));
         }
         this.showForm = false;
         setTimeout(() => this.formTrigger?.focus());
       } catch (error) {
-        this.formError = error instanceof Error ? error.message : 'No fue posible guardar el usuario.';
+        this.formError = error instanceof Error ? error.message : this.translationService.translate('usuarios.errorSave');
       } finally {
         this.isFormPending = false;
       }
@@ -269,7 +295,7 @@ export class UsuariosComponent {
     this.isStatusPending = true;
     this.runUserOperation(user, () => {
       user.status = nextStatus;
-      this.emitNotice(`Usuario "${user.name}" ${nextStatus === 'Activo' ? 'activado' : 'desactivado'} correctamente.`);
+      this.emitNotice(this.translationService.translate(nextStatus === 'Activo' ? 'usuarios.toastUserActivated' : 'usuarios.toastUserDeactivated', { name: user.name }));
       this.pendingStatusChange = null;
       this.isStatusPending = false;
       setTimeout(() => this.statusTrigger?.focus());
@@ -303,7 +329,7 @@ export class UsuariosComponent {
 
     this.isResetAccessPending = true;
     this.runUserOperation(user, () => {
-      this.emitNotice(`Acceso de "${user.name}" restablecido correctamente.`);
+      this.emitNotice(this.translationService.translate('usuarios.toastAccessReset', { name: user.name }));
       this.pendingResetAccess = null;
       this.isResetAccessPending = false;
       setTimeout(() => this.resetAccessTrigger?.focus());
@@ -340,10 +366,10 @@ export class UsuariosComponent {
     setTimeout(() => {
       try {
         this.users = this.users.filter((item) => item.id !== user.id);
-        this.emitNotice(`Usuario "${user.name}" eliminado correctamente.`);
+        this.emitNotice(this.translationService.translate('usuarios.toastUserDeleted', { name: user.name }));
         this.pendingDeletion = null;
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'No fue posible eliminar el usuario. Intenta nuevamente.';
+        const message = error instanceof Error ? error.message : this.translationService.translate('usuarios.errorDelete');
         this.emitNotice(message, 'error');
       } finally {
         const pendingUserIds = new Set(this.pendingUserIds);
@@ -390,7 +416,7 @@ export class UsuariosComponent {
       try {
         operation();
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'No fue posible completar la acción.';
+        const message = error instanceof Error ? error.message : this.translationService.translate('usuarios.errorGeneric');
         this.emitNotice(message, 'error');
       } finally {
         const pendingUserIds = new Set(this.pendingUserIds);

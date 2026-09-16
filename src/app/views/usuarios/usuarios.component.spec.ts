@@ -2,10 +2,14 @@
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { UsuariosComponent } from './usuarios.component';
+import { ToastService } from '../../shared/toast/toast.service';
+import { SettingsService } from '../../settings/settings.service';
 
 describe('UsuariosComponent', () => {
   let fixture: ComponentFixture<UsuariosComponent>;
   let comp: UsuariosComponent;
+  let toastService: ToastService;
+  let settingsService: SettingsService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -14,6 +18,8 @@ describe('UsuariosComponent', () => {
 
     fixture = TestBed.createComponent(UsuariosComponent);
     comp = fixture.componentInstance;
+    toastService = TestBed.inject(ToastService);
+    settingsService = TestBed.inject(SettingsService);
     fixture.detectChanges();
   });
 
@@ -58,6 +64,40 @@ describe('UsuariosComponent', () => {
     expect(created).toBeTruthy();
     expect(created?.password).toBe('MiPassword*2026');
   }));
+
+  it('should notify success/error through the shared ToastService instead of an @Output', () => {
+    spyOn(toastService, 'success');
+    spyOn(toastService, 'error');
+
+    comp.emitNotice('Usuario creado correctamente.');
+    expect(toastService.success).toHaveBeenCalledWith('Usuario creado correctamente.');
+
+    comp.emitNotice('No se pudo completar la acción.', 'error');
+    expect(toastService.error).toHaveBeenCalledWith('No se pudo completar la acción.');
+  });
+
+  it('should translate the whole page (heading, table headers, actions) when the language setting changes', () => {
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('h1')?.textContent).toContain('Gestión de Usuarios');
+    expect(el.querySelector('.table-head th')?.textContent).toContain('USUARIO');
+    expect(comp.roleBadgeLabel('Admin')).toBe('Admin');
+    expect(comp.statusLabel('Activo')).toBe('Activo');
+
+    settingsService.updateDraft({ language: 'en' });
+    fixture.detectChanges();
+
+    expect(el.querySelector('h1')?.textContent).toContain('User Management');
+    expect(el.querySelector('.table-head th')?.textContent).toContain('USER');
+    expect(comp.statusLabel('Activo')).toBe('Active');
+    expect(comp.roleFilterLabel('Analista')).toBe('Analysts');
+
+    settingsService.updateDraft({ language: 'pt' });
+    fixture.detectChanges();
+
+    expect(el.querySelector('h1')?.textContent).toContain('Gestão de Usuários');
+    expect(comp.statusLabel('Inactivo')).toBe('Inativo');
+  });
 
   it('should handle status change modal flow', fakeAsync(() => {
     const user = comp.users[0];

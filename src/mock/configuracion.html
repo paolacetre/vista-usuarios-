@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configuración · Tendencias Ocupacionales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#2fb2f4;
+    --blue-dark:#1a9ee0;
+    --green:#1fa971;
+    --ink:#1c2027;
+    --ink-soft:#5b6472;
+    --line:#e6e9ee;
+    --page-bg:#eef0f3;
+    --card-bg:#ffffff;
+    --pill-bg:#f2f4f7;
+    --radius-lg:16px;
+    --radius-md:12px;
+    --radius-sm:9px;
+    --font-body:"Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-size-scale:1;
+    --density-pad:22px;
+    --accent: var(--blue);
+  }
+
+  [data-theme="dark"]{
+    --ink:#eef1f5;
+    --ink-soft:#a2abb8;
+    --line:#2a2f3a;
+    --page-bg:#14161b;
+    --card-bg:#1c1f26;
+    --pill-bg:#22262f;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--page-bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:calc(15px * var(--font-size-scale));
+    line-height:1.5;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 16px 140px;
+    transition:background .25s ease, color .25s ease;
+  }
+
+  .panel{
+    width:100%;
+    max-width:1180px;
+    background:var(--card-bg);
+    border-radius:24px;
+    box-shadow:0 24px 60px rgba(20,24,32,0.12);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+
+  .panel-head{
+    padding:calc(var(--density-pad) + 6px) calc(var(--density-pad) + 10px) 0;
+  }
+  .panel-head-row{display:flex;align-items:flex-start;justify-content:space-between;}
+  .panel-head h1{margin:0;font-size:1.7em;font-weight:600;letter-spacing:-0.01em;}
+  .panel-head .eyebrow{margin:4px 0 0;font-size:.72em;letter-spacing:.14em;color:var(--ink-soft);font-weight:600;}
+  .close-x{
+    border:none;background:transparent;color:var(--ink-soft);font-size:20px;cursor:pointer;
+    width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  }
+  .close-x:hover{background:var(--pill-bg);color:var(--ink);}
+
+  .tabs{
+    display:flex;gap:6px;margin-top:22px;padding:0 calc(var(--density-pad) + 10px);
+    border-bottom:1px solid var(--line);overflow-x:auto;
+  }
+  .tab-btn{
+    display:flex;align-items:center;gap:8px;
+    background:none;border:none;cursor:pointer;
+    padding:12px 14px;font-family:var(--font-body);
+    font-size:.94em;font-weight:600;color:var(--ink-soft);
+    border-bottom:2px solid transparent;white-space:nowrap;
+  }
+  .tab-btn svg{width:16px;height:16px;flex:none;}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-btn:hover:not(.active){color:var(--ink);}
+
+  .body-grid{
+    display:grid;grid-template-columns:1fr 340px;gap:26px;
+    padding:26px calc(var(--density-pad) + 10px) 10px;
+    align-items:start;
+  }
+  .body-grid.no-preview{grid-template-columns:1fr;}
+
+  @media (max-width:880px){
+    .body-grid{grid-template-columns:1fr;}
+  }
+
+  .main-col{display:flex;flex-direction:column;gap:18px;min-width:0;}
+
+  .section-title{display:flex;align-items:flex-start;gap:12px;margin:2px 0 2px;}
+  .section-title .icon-badge{
+    width:34px;height:34px;border-radius:50%;background:color-mix(in srgb, var(--accent) 16%, transparent);
+    display:flex;align-items:center;justify-content:center;flex:none;
+  }
+  .section-title .icon-badge svg{width:17px;height:17px;color:var(--accent);}
+  .section-title h2{margin:0 0 4px;font-size:1.08em;font-weight:600;}
+  .section-title p{margin:0;color:var(--ink-soft);font-size:.9em;max-width:56ch;}
+
+  .card{
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:var(--density-pad);
+  }
+  [data-theme="dark"] .card{background:#20242c;}
+
+  .card h3{margin:0 0 4px;font-size:1em;font-weight:600;}
+  .card .desc{margin:0 0 16px;color:var(--ink-soft);font-size:.88em;}
+
+  .choice-row{display:flex;gap:10px;background:var(--pill-bg);border-radius:var(--radius-md);padding:6px;}
+  .choice-btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:13px 10px;border-radius:9px;border:none;cursor:pointer;
+    font-family:var(--font-body);font-weight:600;font-size:.92em;
+    background:transparent;color:var(--ink-soft);position:relative;
+  }
+  .choice-btn svg{width:16px;height:16px;}
+  .choice-btn.active{background:var(--accent);color:#fff;box-shadow:0 6px 14px color-mix(in srgb, var(--accent) 45%, transparent);}
+  .choice-btn .check{
+    width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.28);
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .font-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  select.control{
+    width:100%;padding:13px 14px;border-radius:var(--radius-md);border:1px solid var(--line);
+    background:var(--pill-bg);color:var(--ink);font-family:var(--font-body);font-size:.94em;font-weight:500;
+    appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235b6472' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;
+  }
+  .preview-box{
+    flex:none;text-align:center;padding:14px 22px;border-radius:var(--radius-md);
+    border:1px solid var(--line);background:var(--pill-bg);min-width:120px;
+  }
+  .preview-box .aa{font-size:1.7em;font-weight:700;}
+  .preview-box .label{font-size:.72em;color:var(--ink-soft);margin-top:4px;}
+
+  .field-btn{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px;border-radius:var(--radius-md);background:var(--pill-bg);
+    border:1px solid transparent;cursor:pointer;
+  }
+  .field-btn:hover{border-color:var(--line);}
+  .field-btn .lft{display:flex;flex-direction:column;gap:2px;}
+  .field-btn .lft b{font-size:.94em;}
+  .field-btn .lft span{font-size:.82em;color:var(--ink-soft);}
+  .field-btn .chev{color:var(--ink-soft);}
+  .font-preview-name{font-weight:600;}
+
+  .color-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px;}
+  .color-current{display:flex;align-items:center;gap:8px;font-size:.86em;color:var(--ink-soft);}
+  .swatch-dot{width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);}
+  .reset-link{background:none;border:none;color:var(--accent);font-weight:600;font-size:.86em;cursor:pointer;display:flex;align-items:center;gap:5px;}
+  .search-color{
+    width:100%;padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--line);
+    background:var(--pill-bg);font-family:var(--font-body);color:var(--ink);font-size:.9em;margin:14px 0 16px;
+  }
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:12px;}
+  .swatch{
+    width:38px;height:38px;border-radius:50%;cursor:pointer;border:none;position:relative;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .swatch.active::after{
+    content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--accent);
+  }
+  .swatch svg{width:15px;height:15px;color:#fff;}
+
+  .toggle-card{
+    display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--radius-md);
+    background:var(--pill-bg);
+  }
+  .toggle-icon{
+    width:38px;height:38px;border-radius:10px;background:var(--ink);color:var(--card-bg);
+    display:flex;align-items:center;justify-content:center;flex:none;
+  }
+  [data-theme="dark"] .toggle-icon{background:#eef1f5;color:#14161b;}
+  .toggle-icon svg{width:17px;height:17px;}
+  .toggle-txt{flex:1;min-width:0;}
+  .toggle-txt b{display:block;font-size:.94em;margin-bottom:2px;}
+  .toggle-txt span{font-size:.84em;color:var(--ink-soft);}
+
+  .switch{width:42px;height:24px;border-radius:99px;background:#d7dbe2;position:relative;border:none;cursor:pointer;flex:none;transition:background .18s;}
+  [data-theme="dark"] .switch{background:#3a3f4a;}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .switch.on{background:var(--accent);}
+  .switch.on::after{transform:translateX(18px);}
+
+  .note{
+    display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:var(--radius-md);
+    background:color-mix(in srgb, var(--accent) 10%, var(--pill-bg));font-size:.86em;color:var(--ink-soft);
+  }
+  .note svg{width:16px;height:16px;color:var(--accent);flex:none;margin-top:1px;}
+  .note b{color:var(--ink);}
+
+  .lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  @media (max-width:640px){.lang-grid{grid-template-columns:1fr;}}
+  .lang-card{
+    border:1.5px solid var(--line);border-radius:var(--radius-md);padding:16px;cursor:pointer;background:var(--card-bg);
+    position:relative;text-align:left;
+  }
+  .lang-card.active{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 6%, var(--card-bg));}
+  .lang-flag{
+    width:34px;height:24px;border-radius:5px;background:var(--pill-bg);display:flex;align-items:center;justify-content:center;
+    font-size:.72em;font-weight:700;color:var(--ink-soft);margin-bottom:14px;
+  }
+  .lang-card b{display:block;font-size:1em;}
+  .lang-card span{font-size:.82em;color:var(--ink-soft);}
+  .lang-check{position:absolute;top:14px;right:14px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;display:none;align-items:center;justify-content:center;}
+  .lang-card.active .lang-check{display:flex;}
+  .lang-check svg{width:11px;height:11px;}
+
+  .logo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:640px){.logo-grid{grid-template-columns:1fr;}}
+  .logo-card{border:1px solid var(--line);border-radius:var(--radius-md);padding:18px;background:var(--card-bg);}
+  .logo-card .lc-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .logo-card .lc-head svg{width:15px;height:15px;color:var(--accent);}
+  .logo-card h4{margin:0;font-size:.94em;}
+  .logo-card p{margin:4px 0 14px;font-size:.82em;color:var(--ink-soft);}
+  .drop{
+    border:1.5px dashed var(--line);border-radius:var(--radius-sm);padding:22px 10px;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:14px;background:var(--pill-bg);
+    min-height:110px;justify-content:center;
+  }
+  .drop img{max-height:52px;max-width:80%;object-fit:contain;}
+  .drop .fname{font-size:.86em;font-weight:600;}
+  .drop .fmeta{font-size:.76em;color:var(--ink-soft);}
+  .btn-upload{
+    width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#fff;
+    font-family:var(--font-body);font-weight:600;font-size:.88em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-upload:hover{background:var(--blue-dark);}
+  .btn-upload svg{width:15px;height:15px;}
+  .btn-upload.ghost{background:var(--ink);}
+  [data-theme="dark"] .btn-upload.ghost{background:#eef1f5;color:#14161b;}
+
+  .apply-all{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:18px;border-radius:var(--radius-md);background:var(--pill-bg);
+  }
+  .apply-all .lft{display:flex;gap:14px;align-items:flex-start;}
+  .apply-all .ic{width:38px;height:38px;border-radius:50%;background:color-mix(in srgb, var(--accent) 16%, transparent);display:flex;align-items:center;justify-content:center;flex:none;}
+  .apply-all .ic svg{width:17px;height:17px;color:var(--accent);}
+
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .radio-btn{
+    flex:1;min-width:140px;display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:var(--radius-md);
+    background:var(--pill-bg);border:1.5px solid transparent;cursor:pointer;font-weight:600;font-size:.9em;color:var(--ink-soft);
+  }
+  .radio-btn.active{background:var(--accent);color:#fff;}
+  .radio-dot{width:17px;height:17px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;flex:none;}
+  .radio-btn.active .radio-dot::after{content:"";width:7px;height:7px;border-radius:50%;background:#fff;}
+
+  .about-hero{text-align:center;padding:8px 10px 4px;}
+  .about-hero h3{margin:0 0 6px;font-size:1.15em;}
+  .about-hero p{margin:0 0 18px;color:var(--ink-soft);font-size:.9em;}
+  .version-pill{display:inline-block;padding:8px 18px;border-radius:99px;background:color-mix(in srgb, var(--accent) 14%, transparent);color:var(--accent);font-weight:700;font-size:.86em;}
+  .kv-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-size:.9em;}
+  .kv-row + .kv-row{border-top:1px solid var(--line);}
+  .kv-row span{color:var(--ink-soft);}
+  .kv-row b{font-weight:600;}
+  .status-ok{color:var(--green);}
+
+  /* preview panel */
+  .preview-col{position:sticky;top:20px;}
+  .preview-card{
+    border-radius:var(--radius-lg);padding:22px;
+    background:linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, var(--card-bg)), color-mix(in srgb, var(--green) 10%, var(--card-bg)));
+    border:1px solid var(--line);display:flex;flex-direction:column;gap:16px;
+  }
+  .preview-eyebrow{font-size:.72em;letter-spacing:.12em;font-weight:700;color:var(--accent);}
+  .preview-card h3{margin:0;font-size:1.2em;font-weight:600;}
+  .preview-card > p{margin:0;font-size:.84em;color:var(--ink-soft);}
+  .mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .mini-card{background:var(--card-bg);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--line);}
+  .mini-card .lab{font-size:.68em;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;}
+  .mini-card .val{font-size:1.3em;font-weight:700;margin-top:4px;}
+  .mini-card .val.up{color:var(--green);}
+  .mini-chart{background:var(--card-bg);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--line);}
+  .mini-chart .lab{font-size:.68em;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin-bottom:10px;}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:70px;}
+  .bars i{flex:1;border-radius:4px 4px 0 0;background:var(--accent);opacity:.55;}
+  .bars i:nth-child(3n){background:var(--green);opacity:.9;}
+  .bars i:nth-child(2){opacity:.4;}
+  .mini-table{background:var(--card-bg);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--line);}
+  .mtable-bar{height:8px;border-radius:4px;margin-bottom:6px;}
+  .mtable-track{height:4px;border-radius:2px;background:var(--pill-bg);margin-bottom:10px;}
+  .summary-card{border-radius:var(--radius-md);padding:16px;background:var(--card-bg);border:1px solid var(--line);}
+  .summary-card .heading{color:var(--accent);font-weight:700;font-size:.78em;letter-spacing:.08em;margin-bottom:10px;}
+  .summary-row{display:flex;justify-content:space-between;font-size:.86em;padding:5px 0;}
+  .summary-row span{color:var(--ink-soft);}
+  .summary-row b{font-weight:600;}
+
+  /* footer bar */
+  .footer-bar{
+    position:fixed;left:0;right:0;bottom:0;
+    display:flex;justify-content:center;padding:16px;
+    background:linear-gradient(to top, var(--page-bg) 60%, transparent);
+    pointer-events:none;
+  }
+  .footer-inner{
+    pointer-events:auto;
+    width:100%;max-width:1180px;background:var(--card-bg);border:1px solid var(--line);
+    border-radius:16px;box-shadow:0 12px 34px rgba(20,24,32,.18);
+    padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .status-txt{display:flex;align-items:center;gap:9px;font-size:.86em;color:var(--ink-soft);}
+  .status-dot{width:9px;height:9px;border-radius:50%;background:var(--ink-soft);flex:none;}
+  .status-dot.dirty{background:#f0a93b;}
+  .status-dot.saved{background:var(--green);}
+  .footer-actions{display:flex;gap:10px;}
+  .btn{
+    font-family:var(--font-body);font-weight:600;font-size:.9em;cursor:pointer;
+    padding:12px 20px;border-radius:11px;border:none;display:flex;align-items:center;gap:8px;
+  }
+  .btn svg{width:15px;height:15px;}
+  .btn-secondary{background:var(--pill-bg);color:var(--ink);}
+  .btn-secondary:hover{background:var(--line);}
+  .btn-secondary:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-primary{background:var(--accent);color:#fff;box-shadow:0 8px 18px color-mix(in srgb, var(--accent) 45%, transparent);}
+  .btn-primary:hover{background:var(--blue-dark);}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+
+  /* toast */
+  .toast{
+    position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(10px);
+    background:var(--ink);color:var(--card-bg);padding:12px 20px;border-radius:11px;font-size:.88em;font-weight:600;
+    display:flex;align-items:center;gap:9px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast svg{width:15px;height:15px;color:var(--green);}
+
+  /* typography modal */
+  .modal-back{
+    position:fixed;inset:0;background:rgba(10,12,16,.45);display:none;align-items:center;justify-content:center;
+    padding:20px;z-index:60;
+  }
+  .modal-back.show{display:flex;}
+  .modal{
+    width:100%;max-width:560px;max-height:80vh;overflow:auto;background:var(--card-bg);
+    border-radius:18px;border:1px solid var(--line);padding:22px;position:relative;
+  }
+  .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px;}
+  .modal-head-lft{display:flex;gap:12px;align-items:flex-start;}
+  .modal-head-lft .icon-badge{width:34px;height:34px;border-radius:10px;background:color-mix(in srgb, var(--accent) 16%, transparent);display:flex;align-items:center;justify-content:center;flex:none;}
+  .modal-head-lft svg{width:17px;height:17px;color:var(--accent);}
+  .modal-head h3{margin:0 0 3px;font-size:1.02em;}
+  .modal-head p{margin:0;font-size:.84em;color:var(--ink-soft);}
+  .font-option{
+    display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:var(--radius-md);
+    border:1.5px solid var(--line);margin-bottom:10px;cursor:pointer;
+  }
+  .font-option.active{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 6%, var(--card-bg));}
+  .font-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--ink-soft);flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;}
+  .font-option.active .font-radio{border-color:var(--accent);}
+  .font-option.active .font-radio::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);}
+  .font-option .fo-name{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.94em;}
+  .fo-badge{font-size:.68em;font-weight:700;color:var(--accent);background:color-mix(in srgb, var(--accent) 16%, transparent);padding:2px 8px;border-radius:99px;}
+  .font-option p{margin:3px 0 8px;font-size:.82em;color:var(--ink-soft);}
+  .font-option .sample{font-size:1.05em;color:var(--ink);background:var(--pill-bg);padding:8px 10px;border-radius:8px;}
+
+  .close-modal{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--ink-soft);cursor:pointer;}
+  .close-modal svg{width:18px;height:18px;}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="panel-head">
+    <div class="panel-head-row">
+      <div>
+        <h1>Configuración</h1>
+        <p class="eyebrow">PERSONALIZA TU EXPERIENCIA</p>
+      </div>
+      <button class="close-x" title="Cerrar" onclick="alert('Esto cerraría el modal de configuración en tu aplicación.')">✕</button>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="body-grid" id="bodyGrid">
+    <div class="main-col" id="mainCol"></div>
+    <div class="preview-col" id="previewCol"></div>
+  </div>
+</div>
+
+<div class="footer-bar">
+  <div class="footer-inner">
+    <div class="status-txt">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Sin cambios pendientes</span>
+    </div>
+    <div class="footer-actions">
+      <button class="btn btn-secondary" id="btnReset" disabled onclick="resetAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 1 3 6.7M3 12v6h6"/></svg>
+        Restablecer
+      </button>
+      <button class="btn btn-primary" id="btnSave" disabled onclick="saveAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+        Guardar cambios
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+  <span id="toastMsg">Cambios guardados</span>
+</div>
+
+<div class="modal-back" id="fontModalBack">
+  <div class="modal">
+    <button class="close-modal" onclick="closeFontModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-head">
+      <div class="modal-head-lft">
+        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></div>
+        <div>
+          <h3>Tipografía</h3>
+          <p>Selecciona la fuente tipográfica que se aplicará en toda la interfaz.</p>
+        </div>
+      </div>
+    </div>
+    <div id="fontList"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- data ---------- */
+const COLORS = [
+  "#4ADE80","#22C55E","#166534","#38BDF8","#2563EB","#1E40AF",
+  "#F87171","#DC2626","#991B1B","#F97316","#EA580C","#B45309",
+  "#FACC15","#CA8A04","#92400E","#C4B5FD","#A855F7","#6D28D9",
+  "#F9A8D4","#DB2777","#9D174D","#2DD4BF","#0D9488","#065F46",
+  "#94A3B8","#475569","#0F172A","#C08552","#78350F","#3B2412",
+  "#A5B4FC","#3730A3"
+];
+
+const FONTS = [
+  {id:"Work Sans", stack:"'Work Sans', system-ui, sans-serif", desc:"Tipografía oficial del sistema, moderna y limpia."},
+  {id:"Inter", stack:"'Inter', system-ui, sans-serif", desc:"Optimizada para pantallas e interfaces de usuario."},
+  {id:"Roboto", stack:"'Roboto', system-ui, sans-serif", desc:"Estilo clásico, claro y de máxima legibilidad."},
+  {id:"Poppins", stack:"'Poppins', system-ui, sans-serif", desc:"Geométrica, elegante y con personalidad."},
+  {id:"Open Sans", stack:"'Open Sans', system-ui, sans-serif", desc:"Amigable, equilibrada y muy accesible."},
+  {id:"Sistema", stack:"-apple-system, 'Segoe UI', system-ui, sans-serif", desc:"Fuente nativa del sistema operativo del usuario."}
+];
+
+const DEFAULTS = {
+  theme:"light",
+  fontSize:"normal",
+  density:"normal",
+  color:"#38BDF8",
+  font:"Work Sans",
+  language:"ES",
+  highContrast:false,
+  readOnly:false,
+  largeIcons:false,
+  notifications:true,
+  timezone:"America/Bogota",
+  dateFormat:"DD/MM/YYYY",
+  logos:{principal:null, login:null, favicon:null}
+};
+
+const FONT_SIZES = {compact:0.92, normal:1, large:1.12};
+const DENSITY_PAD = {compact:14, normal:22, spacious:30};
+
+let saved = loadSaved();
+let state = clone(saved);
+let activeTab = "apariencia";
+
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function loadSaved(){
+  try{
+    const raw = localStorage.getItem("tdo-config");
+    if(raw) return Object.assign(clone(DEFAULTS), JSON.parse(raw));
+  }catch(e){}
+  return clone(DEFAULTS);
+}
+function persist(obj){
+  try{ localStorage.setItem("tdo-config", JSON.stringify(obj)); }catch(e){}
+}
+
+/* ---------- icons ---------- */
+const ICON = {
+  palette:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16c3.3 0 6-2.7 6-6 0-4.4-4.5-8-10-8Z"/></svg>',
+  image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
+  globe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></svg>',
+  access:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="m19 8-7-2-7 2M12 6v6M8 22l2-8M16 22l-2-8M6 12h12"/></svg>',
+  sliders:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7M3 12v6h6"/></svg>',
+  upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
+  sparkles:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>',
+  contrast:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2a10 10 0 1 0 0 20V2Z"/><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2ZM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7Z"/></svg>',
+  type:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+  calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  clip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>'
+};
+
+const TABS = [
+  {id:"apariencia", label:"Apariencia", icon:ICON.palette},
+  {id:"logos", label:"Logos", icon:ICON.image},
+  {id:"idioma", label:"Idioma", icon:ICON.globe},
+  {id:"accesibilidad", label:"Accesibilidad", icon:ICON.access},
+  {id:"preferencias", label:"Preferencias", icon:ICON.sliders},
+  {id:"acerca", label:"Acerca de", icon:ICON.info}
+];
+
+/* ---------- render tabs ---------- */
+function renderTabs(){
+  const el = document.getElementById("tabs");
+  el.innerHTML = TABS.map(t => `
+    <button class="tab-btn ${activeTab===t.id?'active':''}" onclick="setTab('${t.id}')">
+      ${t.icon}<span>${t.label}</span>
+    </button>`).join("");
+}
+function setTab(id){ activeTab = id; renderAll(); }
+
+/* ---------- apply live to whole page ---------- */
+function applyLive(){
+  const root = document.documentElement;
+  root.setAttribute("data-theme", state.theme);
+  root.style.setProperty("--accent", state.color);
+  root.style.setProperty("--font-size-scale", FONT_SIZES[state.fontSize]);
+  root.style.setProperty("--density-pad", DENSITY_PAD[state.density] + "px");
+  const fontObj = FONTS.find(f => f.id === state.font) || FONTS[0];
+  root.style.setProperty("--font-body", fontObj.stack);
+}
+
+/* ---------- dirty tracking ---------- */
+function isDirty(){ return JSON.stringify(state) !== JSON.stringify(saved); }
+function refreshFooter(){
+  const dirty = isDirty();
+  document.getElementById("btnSave").disabled = !dirty;
+  document.getElementById("btnReset").disabled = !dirty;
+  const dot = document.getElementById("statusDot");
+  const txt = document.getElementById("statusText");
+  dot.className = "status-dot" + (dirty ? " dirty" : "");
+  txt.textContent = dirty ? "Tienes cambios sin guardar" : "Sin cambios pendientes";
+}
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> t.classList.remove("show"), 2600);
+}
+
+function saveAll(){
+  if(!isDirty()) return;
+  saved = clone(state);
+  persist(saved);
+  refreshFooter();
+  showToast("Cambios guardados correctamente");
+}
+
+function resetAll(){
+  state = clone(DEFAULTS);
+  applyLive();
+  renderAll();
+  showToast("Configuración restablecida a los valores por defecto");
+}
+
+/* ---------- update helper ---------- */
+function update(path, value){
+  const keys = path.split(".");
+  let obj = state;
+  for(let i=0;i<keys.length-1;i++) obj = obj[keys[i]];
+  obj[keys[keys.length-1]] = value;
+  applyLive();
+  renderAll();
+}
+
+/* ---------- sections ---------- */
+function sectionApariencia(){
+  const fontObj = FONTS.find(f=>f.id===state.font) || FONTS[0];
+  return `
+  <div class="section-title">
+    <div class="icon-badge">${ICON.palette}</div>
+    <div>
+      <h2>Personalización visual</h2>
+      <p>Ajusta el aspecto de la plataforma para que se adapte a tus preferencias. Estos cambios se aplican al instante.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Tema</h3>
+    <p class="desc">Elige entre modo claro u oscuro para tu experiencia.</p>
+    <div class="choice-row">
+      <button class="choice-btn ${state.theme==='light'?'active':''}" onclick="update('theme','light')">
+        ${ICON.sun}<span>Claro</span>${state.theme==='light'?`<span class="check">${ICON.check}</span>`:''}
+      </button>
+      <button class="choice-btn ${state.theme==='dark'?'active':''}" onclick="update('theme','dark')">
+        ${ICON.moon}<span>Oscuro</span>${state.theme==='dark'?`<span class="check">${ICON.check}</span>`:''}
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="font-row">
+      <div style="flex:1;min-width:220px;">
+        <h3>Tamaño de fuente</h3>
+        <p class="desc">Define el tamaño del texto en toda la plataforma.</p>
+        <select class="control" onchange="update('fontSize', this.value)">
+          <option value="compact" ${state.fontSize==='compact'?'selected':''}>Compacto</option>
+          <option value="normal" ${state.fontSize==='normal'?'selected':''}>Normal</option>
+          <option value="large" ${state.fontSize==='large'?'selected':''}>Grande</option>
+        </select>
+      </div>
+      <div class="preview-box">
+        <div class="aa">Aa</div>
+        <div class="label">Previsualización</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Densidad de interfaz</h3>
+    <p class="desc">Ajusta el espaciado entre elementos para mayor comodidad.</p>
+    <div class="choice-row">
+      <button class="choice-btn ${state.density==='compact'?'active':''}" onclick="update('density','compact')">≡ Compacta ${state.density==='compact'?`<span class="check">${ICON.check}</span>`:''}</button>
+      <button class="choice-btn ${state.density==='normal'?'active':''}" onclick="update('density','normal')">≡ Normal ${state.density==='normal'?`<span class="check">${ICON.check}</span>`:''}</button>
+      <button class="choice-btn ${state.density==='spacious'?'active':''}" onclick="update('density','spacious')">— Espaciosa ${state.density==='spacious'?`<span class="check">${ICON.check}</span>`:''}</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Tipografía</h3>
+    <p class="desc">Selecciona la fuente tipográfica que se aplicará en toda la interfaz.</p>
+    <button class="field-btn" onclick="openFontModal()">
+      <span class="lft"><b class="font-preview-name" style="font-family:${fontObj.stack}">${fontObj.id}</b><span>${fontObj.desc}</span></span>
+      <span class="chev">${ICON.chevron}</span>
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="color-head">
+      <div>
+        <h3>Color principal</h3>
+        <p class="desc" style="margin-bottom:0;">Cambia el color principal del sistema para todos los usuarios.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="color-current">Color actual <span class="swatch-dot" style="background:${state.color}"></span></div>
+        <button class="reset-link" onclick="update('color','${DEFAULTS.color}')">${ICON.refresh} Restablecer</button>
+      </div>
+    </div>
+    <input class="search-color" placeholder="Busca un color... (ej. amarillo)" oninput="filterColors(this.value)">
+    <div class="swatches" id="swatches">${renderSwatches()}</div>
+  </div>
+  `;
+}
+function renderSwatches(filter){
+  return COLORS.filter(c => !filter).map(c => `
+    <button class="swatch ${state.color.toLowerCase()===c.toLowerCase()?'active':''}" style="background:${c}" onclick="update('color','${c}')">
+      ${state.color.toLowerCase()===c.toLowerCase()?ICON.check:''}
+    </button>`).join("");
+}
+function filterColors(q){
+  // simple demo filter (no real color-name mapping, keep all visible)
+  document.getElementById("swatches").innerHTML = renderSwatches();
+}
+
+function sectionLogos(){
+  const l = state.logos;
+  const slot = (key, title, desc, iconOn, aspect) => `
+    <div class="logo-card">
+      <div class="lc-head">${iconOn}<h4>${title}</h4></div>
+      <p>${desc}</p>
+      <div class="drop">
+        ${l[key] ? `<img src="${l[key]}" alt="${title}"><div class="fname">${key}.svg</div><div class="fmeta">Formato actual</div>`
+                 : `<div class="fmeta">Aún no se ha subido un logo</div>`}
+      </div>
+      <label class="btn-upload">
+        ${ICON.upload} Subir logo
+        <input type="file" accept="image/*" style="display:none" onchange="uploadLogo(event,'${key}')">
+      </label>
+    </div>`;
+
+  return `
+  <div class="section-title">
+    <div class="icon-badge">${ICON.palette}</div>
+    <div><h2>Identidad visual</h2><p>Gestiona los logos principales de la plataforma desde un solo lugar.</p></div>
+  </div>
+
+  <div class="card">
+    <div class="apply-all">
+      <div class="lft">
+        <div class="ic">${ICON.sparkles}</div>
+        <div>
+          <h3 style="margin-bottom:2px;">Aplicar el mismo logo en toda la plataforma</h3>
+          <p class="desc" style="margin:0;">Sube una imagen y se aplicará como logo principal, de login y favicon.</p>
+        </div>
+      </div>
+      <label class="btn-upload" style="width:auto;">
+        ${ICON.upload} Subir y aplicar a los 3
+        <input type="file" accept="image/*" style="display:none" onchange="uploadLogo(event,'all')">
+      </label>
+    </div>
+    <div class="note" style="margin-top:14px;">${ICON.info} <span><b>Formatos recomendados:</b> SVG. Tamaño máximo: 2MB.</span></div>
+  </div>
+
+  <div class="logo-grid">
+    ${slot("principal","Cambio de logo principal","Personaliza el logo principal de la aplicación (navbar/sidebar)", ICON.clip)}
+    ${slot("login","Cambio de logo de login","Personaliza el logo mostrado en la pantalla de inicio de sesión", ICON.lock)}
+  </div>
+
+  <div class="card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;gap:12px;align-items:center;flex:1;min-width:220px;">
+      <div class="drop" style="min-height:70px;width:70px;margin:0;padding:8px;">
+        ${l.favicon ? `<img src="${l.favicon}" alt="favicon">` : `<span style="font-size:.7em;color:var(--ink-soft)">Sin logo</span>`}
+      </div>
+      <div>
+        <h4 style="margin:0 0 4px;display:flex;align-items:center;gap:8px;">${ICON.globe} Cambio de favicon</h4>
+        <p style="margin:0;font-size:.82em;color:var(--ink-soft);">Personaliza el icono de la pestaña del navegador · Recomendado: 32×32 px o 64×64 px</p>
+      </div>
+    </div>
+    <label class="btn-upload" style="width:auto;">
+      ${ICON.upload} Subir logo
+      <input type="file" accept="image/*" style="display:none" onchange="uploadLogo(event,'favicon')">
+    </label>
+  </div>
+  `;
+}
+function uploadLogo(evt, key){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    if(key === "all"){
+      state.logos.principal = reader.result;
+      state.logos.login = reader.result;
+      state.logos.favicon = reader.result;
+    } else {
+      state.logos[key] = reader.result;
+    }
+    renderAll();
+  };
+  reader.readAsDataURL(file);
+}
+
+function sectionIdioma(){
+  const langs = [
+    {id:"ES", flag:"ES", name:"Español", native:"Español"},
+    {id:"GB", flag:"GB", name:"English", native:"English"},
+    {id:"BR", flag:"BR", name:"Português", native:"Português"}
+  ];
+  return `
+  <div class="card">
+    <h3>Idioma</h3>
+    <p class="desc">Selecciona tu idioma preferido</p>
+    <div class="lang-grid">
+      ${langs.map(l => `
+        <div class="lang-card ${state.language===l.id?'active':''}" onclick="update('language','${l.id}')">
+          <div class="lang-flag">${l.flag}</div>
+          <b>${l.name}</b><span>${l.native}</span>
+          <div class="lang-check">${ICON.check}</div>
+        </div>`).join("")}
+    </div>
+  </div>
+  <div class="note">${ICON.check} <span><b>${langs.find(l=>l.id===state.language).name} seleccionado</b> — El cambio se aplicará al guardar la configuración.</span></div>
+  `;
+}
+
+function sectionAccesibilidad(){
+  const row = (key, icon, title, desc) => `
+    <div class="toggle-card">
+      <div class="toggle-icon">${icon}</div>
+      <div class="toggle-txt"><b>${title}</b><span>${desc}</span></div>
+      <button class="switch ${state[key]?'on':''}" onclick="update('${key}', ${!state[key]})"></button>
+    </div>`;
+  return `
+  <div class="section-title">
+    <div class="icon-badge">${ICON.access}</div>
+    <div><h2>Opciones de accesibilidad</h2><p>Ajusta la interfaz para mejorar lectura, visibilidad y navegación.</p></div>
+  </div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px;">
+    ${row("highContrast", ICON.contrast, "Alto contraste", "Mejora la legibilidad aumentando la diferencia entre fondo y contenido.")}
+    ${row("readOnly", ICON.book, "Modo solo lectura", "Evita cambios accidentales y desactiva la edición para visitantes.")}
+    ${row("largeIcons", ICON.type, "Iconos grandes", "Aumenta el tamaño de los iconos para facilitar su identificación.")}
+  </div>
+  <div class="note">${ICON.info} <span><b>Consejo:</b> estos ajustes pueden aplicarse globalmente para todos los usuarios.</span></div>
+  `;
+}
+
+function sectionPreferencias(){
+  const tz = ["America/Bogota","America/Mexico_City","America/Lima","America/Santiago","America/New_York","Europe/Madrid"];
+  return `
+  <div class="card">
+    <div class="toggle-card" style="background:transparent;padding:0;">
+      <div class="toggle-icon" style="background:color-mix(in srgb, var(--accent) 16%, transparent);color:var(--accent);">${ICON.bell}</div>
+      <div class="toggle-txt"><b>Notificaciones del sistema</b><span>Recibe alertas de cambios importantes</span></div>
+      <button class="switch ${state.notifications?'on':''}" onclick="update('notifications', ${!state.notifications})"></button>
+    </div>
+    <div class="note" style="margin-top:16px;">${ICON.info} <span>Te mantendremos informado sobre actualizaciones, mantenimiento y cambios relevantes.</span></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+      <div class="toggle-icon" style="background:color-mix(in srgb, var(--accent) 16%, transparent);color:var(--accent);">${ICON.globe}</div>
+      <div class="toggle-txt"><b>Zona horaria</b><span>Selecciona la zona horaria de tu ubicación actual</span></div>
+    </div>
+    <select class="control" onchange="update('timezone', this.value)">
+      ${tz.map(z => `<option value="${z}" ${state.timezone===z?'selected':''}>${z}</option>`).join("")}
+    </select>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+      <div class="toggle-icon" style="background:color-mix(in srgb, var(--accent) 16%, transparent);color:var(--accent);">${ICON.calendar}</div>
+      <div class="toggle-txt"><b>Formato de fecha</b><span>Elige el formato en el que deseas ver las fechas</span></div>
+    </div>
+    <div class="radio-row">
+      ${["DD/MM/YYYY","MM/DD/YYYY","YYYY-MM-DD"].map(f => `
+        <button class="radio-btn ${state.dateFormat===f?'active':''}" onclick="update('dateFormat','${f}')">
+          <span class="radio-dot"></span>${f}
+        </button>`).join("")}
+    </div>
+  </div>
+  <div class="note">${ICON.sparkles} <span><b>Consejo:</b> Estos ajustes se aplicarán en toda la plataforma para una experiencia consistente.</span></div>
+  `;
+}
+
+function sectionAcerca(){
+  return `
+  <div class="card about-hero">
+    <h3>Tendencias Ocupacionales</h3>
+    <p>Plataforma análisis de datos ocupacionales SENA</p>
+    <span class="version-pill">Versión: v1.0.0</span>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:10px;">Información del servidor</h3>
+    <div class="kv-row"><span>API:</span><b class="status-ok">Conectado</b></div>
+    <div class="kv-row"><span>Desarrollado por:</span><b>SENA - Colombia</b></div>
+  </div>
+  `;
+}
+
+const SECTIONS = {
+  apariencia: sectionApariencia,
+  logos: sectionLogos,
+  idioma: sectionIdioma,
+  accesibilidad: sectionAccesibilidad,
+  preferencias: sectionPreferencias,
+  acerca: sectionAcerca
+};
+
+/* ---------- preview panel ---------- */
+function renderPreview(){
+  const bars = [40,25,55,50,75,45,60];
+  return `
+  <div class="preview-card">
+    <div class="preview-eyebrow">PREVIEW EN VIVO</div>
+    <h3>Interfaz TDO personalizada</h3>
+    <p>Visualiza aquí cómo se verá el sistema antes de cerrar la configuración.</p>
+    <div class="mini-stats">
+      <div class="mini-card"><div class="lab">REGISTROS</div><div class="val">12.4K</div></div>
+      <div class="mini-card"><div class="lab">CRECIMIENTO</div><div class="val up">+8.7%</div></div>
+    </div>
+    <div class="mini-chart">
+      <div class="lab">MINI GRÁFICO</div>
+      <div class="bars">${bars.map(h=>`<i style="height:${h}%"></i>`).join("")}</div>
+    </div>
+    <div class="mini-table">
+      <div class="lab" style="margin-bottom:10px;">MINI TABLA</div>
+      <div class="mtable-bar" style="background:var(--accent);width:70%"></div>
+      <div class="mtable-track" style="width:70%"></div>
+      <div class="mtable-bar" style="background:var(--green);width:55%"></div>
+      <div class="mtable-track" style="width:55%"></div>
+      <div class="mtable-bar" style="background:#1E40AF;width:85%"></div>
+      <div class="mtable-track" style="width:85%"></div>
+    </div>
+  </div>
+  <div class="summary-card" style="margin-top:16px;">
+    <div class="heading">RESUMEN ACTIVO</div>
+    <div class="summary-row"><span>Tema</span><b>${state.theme==='light'?'Claro':'Oscuro'}</b></div>
+    <div class="summary-row"><span>Fuente</span><b>${state.font}</b></div>
+    <div class="summary-row"><span>Tamaño</span><b>${state.fontSize}</b></div>
+    <div class="summary-row"><span>Densidad</span><b>${state.density}</b></div>
+    <div class="summary-row"><span>Idioma</span><b>${state.language}</b></div>
+  </div>
+  `;
+}
+
+/* ---------- font modal ---------- */
+function renderFontList(){
+  document.getElementById("fontList").innerHTML = FONTS.map(f => `
+    <div class="font-option ${state.font===f.id?'active':''}" onclick="update('font','${f.id}'); closeFontModal(true);">
+      <div class="font-radio"></div>
+      <div style="flex:1;">
+        <div class="fo-name">${f.id} ${state.font===f.id?'<span class="fo-badge">Activa</span>':''}</div>
+        <p>${f.desc}</p>
+        <div class="sample" style="font-family:${f.stack}">ABCDEFGHIJKLM abcdefghijklm 1234567890</div>
+      </div>
+    </div>`).join("");
+}
+function openFontModal(){ renderFontList(); document.getElementById("fontModalBack").classList.add("show"); }
+function closeFontModal(){ document.getElementById("fontModalBack").classList.remove("show"); }
+
+/* ---------- master render ---------- */
+function renderAll(){
+  renderTabs();
+  document.getElementById("mainCol").innerHTML = SECTIONS[activeTab]();
+  const grid = document.getElementById("bodyGrid");
+  const prevCol = document.getElementById("previewCol");
+  if(activeTab === "apariencia"){
+    grid.classList.remove("no-preview");
+    prevCol.style.display = "";
+    prevCol.innerHTML = renderPreview();
+  } else {
+    grid.classList.add("no-preview");
+    prevCol.style.display = "none";
+  }
+  if(document.getElementById("fontModalBack").classList.contains("show")) renderFontList();
+  refreshFooter();
+}
+
+applyLive();
+renderAll();
+</script>
+</body>
+</html>

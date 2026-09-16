@@ -39,19 +39,19 @@
 .primary-button {
   border: 0;
   border-radius: 10px;
-  background: #49b009;
+  background: var(--accent-color, #49b009);
   color: #fff;
   padding: 12px 18px;
   font-weight: 700;
   font-size: 13px;
-  box-shadow: 0 3px 0 #328907;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
   cursor: pointer;
   transition: background-color 0.18s ease, transform 0.18s ease;
 }
 
 .primary-button:hover {
-  background: #379b05;
-  box-shadow: 0 4px 0 #267804;
+  background: var(--accent-color-hover, #2e8e00);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
 }
 
@@ -101,8 +101,8 @@
 
 .search-box:focus-within {
   background: #fff;
-  border-color: #49b009;
-  outline: 3px solid rgba(73, 176, 9, 0.2);
+  border-color: var(--accent-color, #49b009);
+  outline: 3px solid var(--accent-color-soft, rgba(73, 176, 9, 0.2));
 }
 
 .search-box svg {
@@ -520,18 +520,34 @@
   stroke-linejoin: round;
 }
 
-.row-actions .access { color: #3266ba; }
-.row-actions .status-action { color: #a8642d; }
-.row-actions .danger { color: #b63d4b; }
+.row-actions .edit-btn { color: #2563eb; }
+.row-actions .access { color: #0284c7; }
+.row-actions .status-action { color: #d97706; }
+.row-actions .danger { color: #dc2626; }
 
 .row-actions button:hover {
   background: #e1e8ed;
-  color: #193b73;
+  color: var(--primary-color, #193b73);
+}
+
+.row-actions .edit-btn:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.row-actions .access:hover {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.row-actions .status-action:hover {
+  background: #fef3c7;
+  color: #b45309;
 }
 
 .row-actions .danger:hover {
-  background: #fae4e7;
-  color: #b63d4b;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .row-actions button:disabled {
@@ -716,8 +732,8 @@
 .field-item input:focus,
 .field-item select:focus {
   background: #fff;
-  border-color: #49b009;
-  outline: 3px solid rgba(73, 176, 9, 0.2);
+  border-color: var(--accent-color, #49b009);
+  outline: 3px solid var(--accent-color-soft, rgba(73, 176, 9, 0.2));
 }
 
 .field-item input::placeholder {
@@ -766,10 +782,10 @@
 }
 
 .save-button {
-  background: #49b009;
+  background: var(--accent-color, #49b009);
   border: 0;
   border-radius: 10px;
-  box-shadow: 0 2px 0 #328907;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
   color: #fff;
   cursor: pointer;
   font-size: 13px;
@@ -779,8 +795,8 @@
 }
 
 .save-button:hover:not(:disabled) {
-  background: #379b05;
-  box-shadow: 0 3px 0 #267804;
+  background: var(--accent-color-hover, #379b05);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
 }
 
@@ -887,12 +903,12 @@
 }
 
 .status-confirm-btn.activate {
-  background: #49b009;
-  box-shadow: 0 2px 0 #328907;
+  background: var(--accent-color, #49b009);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .status-confirm-btn.activate:hover:not(:disabled) {
-  background: #379b05;
+  background: var(--accent-color-hover, #379b05);
   transform: translateY(-1px);
 }
 
@@ -972,6 +988,11 @@
   color: #9eb1c4;
 }
 
+:host-context(.shell.dark-mode) .alert-dialog-titles strong,
+:host-context(.shell.dark-mode) .confirm-dialog strong {
+  color: #f1f5f9;
+}
+
 :host-context(.shell.dark-mode) .close-dialog-btn {
   background: #1f3347;
   color: #c9dbed;
@@ -992,7 +1013,7 @@
 :host-context(.shell.dark-mode) .field-item input:focus,
 :host-context(.shell.dark-mode) .field-item select:focus {
   background: #1c3247;
-  border-color: #49b009;
+  border-color: var(--accent-color, #49b009);
 }
 
 :host-context(.shell.dark-mode) .secondary-button {
@@ -1106,6 +1127,61 @@
 
 :host-context(.shell.dark-mode) .user-row {
   border-color: #223548;
+}
+
+:host-context(.shell.dark-mode) .user-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+:host-context(.shell.dark-mode) .user-row:focus-within {
+  background: #182b3d;
+  outline: 2px solid #2d6d4a;
+  outline-offset: -2px;
+}
+
+:host-context(.shell.dark-mode) .row-actions {
+  background: #182b3d;
+  border: 1px solid #2b4257;
+}
+
+:host-context(.shell.dark-mode) .row-actions button {
+  color: #94a3b8;
+}
+
+:host-context(.shell.dark-mode) .row-actions .edit-btn {
+  color: #38bdf8;
+}
+
+:host-context(.shell.dark-mode) .row-actions .edit-btn:hover {
+  background: #1e3a5f;
+  color: #7dd3fc;
+}
+
+:host-context(.shell.dark-mode) .row-actions .access {
+  color: #60a5fa;
+}
+
+:host-context(.shell.dark-mode) .row-actions .access:hover {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+
+:host-context(.shell.dark-mode) .row-actions .status-action {
+  color: #fbbf24;
+}
+
+:host-context(.shell.dark-mode) .row-actions .status-action:hover {
+  background: #3b2d15;
+  color: #fde68a;
+}
+
+:host-context(.shell.dark-mode) .row-actions .danger {
+  color: #f87171;
+}
+
+:host-context(.shell.dark-mode) .row-actions .danger:hover {
+  background: #3b171c;
+  color: #fca5a5;
 }
 
 :host-context(.shell.dark-mode) .empty-state {

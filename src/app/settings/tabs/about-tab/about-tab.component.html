@@ -1,0 +1,17 @@
+<section class="config-card about-hero-card">
+  <h2>{{ 'about.appName' | translate }}</h2>
+  <p class="card-description">{{ 'about.appDesc' | translate }}</p>
+  <span class="version-pill">{{ 'about.version' | translate:{ version: version } }}</span>
+</section>
+
+<section class="config-card" aria-labelledby="section-about-server">
+  <h3 id="section-about-server" class="about-subtitle">{{ 'about.serverInfoTitle' | translate }}</h3>
+  <div class="kv-row">
+    <span>{{ 'about.apiLabel' | translate }}</span>
+    <strong class="status-ok">{{ 'about.apiStatus' | translate }}</strong>
+  </div>
+  <div class="kv-row">
+    <span>{{ 'about.developedByLabel' | translate }}</span>
+    <strong>{{ 'about.developedBy' | translate }}</strong>
+  </div>
+</section>

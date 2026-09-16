@@ -1,0 +1,56 @@
+<form [formGroup]="form" class="tab-form">
+
+  <section class="config-card" aria-labelledby="section-notifications-title">
+    <div class="toggle-row no-border">
+      <div class="toggle-row-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      </div>
+      <div class="toggle-row-text">
+        <strong id="section-notifications-title">{{ 'preferences.notificationsTitle' | translate }}</strong>
+        <span>{{ 'preferences.notificationsDesc' | translate }}</span>
+      </div>
+      <button type="button" class="switch-control" [class.on]="form.controls.notifications.value" (click)="toggleNotifications()" role="switch" [attr.aria-checked]="form.controls.notifications.value" [attr.aria-label]="'preferences.notificationsTitle' | translate"></button>
+    </div>
+    <p class="logos-note">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span>{{ 'preferences.notificationsNote' | translate }}</span>
+    </p>
+  </section>
+
+  <section class="config-card" aria-labelledby="section-timezone-title">
+    <div class="card-title-row-inline">
+      <div class="card-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></svg>
+      </div>
+      <div>
+        <h2 id="section-timezone-title">{{ 'preferences.timezoneTitle' | translate }}</h2>
+        <p class="card-description">{{ 'preferences.timezoneDesc' | translate }}</p>
+      </div>
+    </div>
+    <select class="select-control" formControlName="timezone" [attr.aria-label]="'preferences.timezoneTitle' | translate">
+      <option *ngFor="let tz of timezoneOptions" [value]="tz">{{ tz }}</option>
+    </select>
+  </section>
+
+  <section class="config-card" aria-labelledby="section-dateformat-title">
+    <div class="card-title-row-inline">
+      <div class="card-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      </div>
+      <div>
+        <h2 id="section-dateformat-title">{{ 'preferences.dateFormatTitle' | translate }}</h2>
+        <p class="card-description">{{ 'preferences.dateFormatDesc' | translate }}</p>
+      </div>
+    </div>
+    <div class="date-format-row" role="radiogroup" [attr.aria-label]="'preferences.dateFormatTitle' | translate">
+      <label *ngFor="let f of dateFormatOptions" class="date-format-btn" [class.active]="form.controls.dateFormat.value === f">
+        <input type="radio" formControlName="dateFormat" [value]="f" class="sr-only">
+        <span class="radio-dot" aria-hidden="true"></span>{{ f }}
+      </label>
+    </div>
+  </section>
+
+  <section class="config-card compact-preview-note">
+    <p><strong>{{ 'preferences.tip' | translate }}</strong> {{ 'preferences.tipDesc' | translate }}</p>
+  </section>
+</form>

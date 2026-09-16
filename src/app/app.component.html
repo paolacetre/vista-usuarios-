@@ -1,67 +1,98 @@
 <div class="shell" [class.dark-mode]="darkMode">
   <ng-container *ngIf="sessionRole === 'Administrador'; else restricted">
-    <!-- Topbar Navigation -->
-    <header class="topbar">
-      <div class="brand">
-        <span class="brand-mark">T</span>
-        <span>Tendencias Ocupacionales</span>
+    <div class="app-layout">
+      <!-- Menú principal: vertical, al lado izquierdo -->
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">T</span>
+          <span>Tendencias Ocupacionales</span>
+        </div>
+
+        <nav class="side-nav" [attr.aria-label]="'shell.mainNavAria' | translate">
+          <button type="button" class="nav-tab" [class.active]="currentView === 'usuarios'" (click)="switchView('usuarios')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            {{ 'nav.usuarios' | translate }}
+          </button>
+          <button type="button" class="nav-tab" [class.active]="currentView === 'perfil'" (click)="switchView('perfil')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            {{ 'nav.perfil' | translate }}
+          </button>
+          <button type="button" class="nav-tab" [class.active]="currentView === 'configuracion'" (click)="switchView('configuracion')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2.5V20a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1A1.7 1.7 0 0 0 8 15a1.7 1.7 0 0 0-1.6-1H6v-2.5h.4A1.7 1.7 0 0 0 8 10a1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h2.5V5a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2.5H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+            {{ 'nav.configuracion' | translate }}
+          </button>
+        </nav>
+      </aside>
+
+      <div class="main-area">
+        <header class="topbar">
+          <div class="top-actions">
+            <button class="icon-button notification" type="button" [title]="'topbar.notifications' | translate" [attr.aria-label]="'topbar.notifications' | translate" (click)="notifyNoNewNotifications()">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+              <b>22</b>
+            </button>
+            <button class="icon-button" [class.active]="currentView === 'configuracion'" type="button" [title]="'topbar.settingsShortcut' | translate" [attr.aria-label]="'nav.configuracion' | translate" (click)="switchView(currentView === 'configuracion' ? 'usuarios' : 'configuracion')">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2.5V20a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1A1.7 1.7 0 0 0 8 15a1.7 1.7 0 0 0-1.6-1H6v-2.5h.4A1.7 1.7 0 0 0 8 10a1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h2.5V5a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2.5H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+            </button>
+            <button class="icon-button" type="button" [title]="darkMode ? ('topbar.themeToLight' | translate) : ('topbar.themeToDark' | translate)" [attr.aria-label]="darkMode ? ('topbar.themeToLight' | translate) : ('topbar.themeToDark' | translate)" (click)="toggleDarkMode()">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.5 8.5 0 1 0 20.5 15.2Z"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="content">
+          <!-- Vista Modular: Gestión de Usuarios -->
+          <app-usuarios
+            *ngIf="currentView === 'usuarios' || configurationOpen"
+            [users]="users">
+          </app-usuarios>
+
+          <!-- Vista Modular: Configuración de Perfil -->
+          <app-perfil
+            *ngIf="currentView === 'perfil'"
+            [profile]="profileUser"
+            (profileSaved)="onProfileSaved($event)"
+            (cancel)="switchView('usuarios')">
+          </app-perfil>
+        </main>
       </div>
+    </div>
 
-      <nav class="top-nav" aria-label="Navegación principal">
-        <button type="button" class="nav-tab" [class.active]="currentView === 'usuarios'" (click)="switchView('usuarios')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Usuarios
+    <!-- Configuración se presenta como modal sobre la vista actual -->
+    <div
+      class="configuration-modal-backdrop"
+      *ngIf="configurationOpen"
+      role="presentation"
+      (click)="closeConfiguration()">
+      <section
+        class="configuration-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="configuration-modal-title"
+        (click)="$event.stopPropagation()">
+        <button
+          class="configuration-modal-close"
+          type="button"
+          [title]="'shell.closeSettings' | translate"
+          [attr.aria-label]="'shell.closeSettings' | translate"
+          (click)="closeConfiguration()">
+          <span aria-hidden="true">&times;</span>
         </button>
-        <button type="button" class="nav-tab" [class.active]="currentView === 'perfil'" (click)="switchView('perfil')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Perfil
-        </button>
-      </nav>
-
-      <div class="top-actions">
-        <button class="icon-button notification" type="button" title="Notificaciones" aria-label="Notificaciones" (click)="setNotice('No tienes nuevas notificaciones.')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
-          <b>22</b>
-        </button>
-        <button class="icon-button" [class.active]="currentView === 'perfil'" type="button" title="Configuración de perfil" aria-label="Configuración de perfil" (click)="switchView(currentView === 'perfil' ? 'usuarios' : 'perfil')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2.5V20a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1A1.7 1.7 0 0 0 8 15a1.7 1.7 0 0 0-1.6-1H6v-2.5h.4A1.7 1.7 0 0 0 8 10a1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h2.5V5a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2.5H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
-        </button>
-        <button class="icon-button" type="button" title="Cambiar tema" aria-label="Cambiar tema" (click)="darkMode = !darkMode">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.5 8.5 0 1 0 20.5 15.2Z"/></svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="content">
-      <!-- Vista Modular: Gestión de Usuarios -->
-      <app-usuarios
-        *ngIf="currentView === 'usuarios'"
-        [users]="users"
-        (noticeTriggered)="handleNotice($event)">
-      </app-usuarios>
-
-      <!-- Vista Modular: Configuración de Perfil -->
-      <app-perfil
-        *ngIf="currentView === 'perfil'"
-        [profile]="profileUser"
-        (profileSaved)="onProfileSaved($event)"
-        (cancel)="switchView('usuarios')">
-      </app-perfil>
-    </main>
-
-    <!-- Toast Notifications -->
-    <div class="toast" *ngIf="notice" [class.error]="noticeType === 'error'" aria-live="polite" role="status">
-      {{ notice }}
+        <h2 id="configuration-modal-title" class="sr-only">{{ 'nav.configuracion' | translate }}</h2>
+        <app-settings></app-settings>
+      </section>
     </div>
   </ng-container>
 
   <ng-template #restricted>
     <div class="restricted">
       <div class="lock">!</div>
-      <h1>Acceso restringido</h1>
-      <p>Esta sesión requiere el rol Administrador para ver la gestión de usuarios.</p>
+      <h1>{{ 'shell.restrictedTitle' | translate }}</h1>
+      <p>{{ 'shell.restrictedDesc' | translate }}</p>
     </div>
   </ng-template>
 </div>
+
+<app-toast-container></app-toast-container>
 
