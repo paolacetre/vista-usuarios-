@@ -197,9 +197,10 @@
 
 .configuration-modal-close {
   position: absolute;
-  top: 18px;
-  right: 20px;
-  z-index: 2;
+  top: 16px;
+  right: 22px;
+  z-index: 3;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
   width: 36px;
@@ -229,9 +230,13 @@
   height: 100%;
   min-height: 0;
   display: block;
-  padding: 16px 22px 20px;
+  box-sizing: border-box;
+  padding: 16px 22px 0;
   overflow-y: auto;
   overflow-x: hidden;
+  border-radius: 14px;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
 }
 
 @keyframes configurationBackdropIn {
@@ -404,7 +409,8 @@
   }
 
   .configuration-modal > app-settings {
-    padding: 18px 14px 24px;
+    padding: 18px 14px 0;
+    border-radius: 14px;
   }
 }
 

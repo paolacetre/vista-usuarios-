@@ -31,12 +31,12 @@
         </div>
 
         <div class="avatar-controls">
-          <label class="btn-upload" tabindex="0">
+          <label class="btn-upload" [attr.tabindex]="readOnly() ? -1 : 0" [style.pointer-events]="readOnly() ? 'none' : null" [style.opacity]="readOnly() ? 0.5 : null">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <span>{{ 'perfil.uploadPhoto' | translate }}</span>
-            <input type="file" accept="image/png, image/jpeg, image/webp" class="sr-only" (change)="onPhotoSelected($event)">
+            <input type="file" accept="image/png, image/jpeg, image/webp" class="sr-only" [disabled]="readOnly()" (change)="onPhotoSelected($event)">
           </label>
-          <button *ngIf="formProfile.photoUrl" type="button" class="btn-remove-photo" (click)="removePhoto()" [title]="'perfil.deletePhotoTitle' | translate">
+          <button *ngIf="formProfile.photoUrl" type="button" class="btn-remove-photo" [disabled]="readOnly()" (click)="removePhoto()" [title]="'perfil.deletePhotoTitle' | translate">
             {{ 'perfil.deletePhoto' | translate }}
           </button>
         </div>
@@ -60,7 +60,7 @@
         </div>
         <div class="meta-item">
           <dt class="meta-label">{{ 'perfil.joinDateLabel' | translate }}</dt>
-          <dd class="meta-value">{{ formProfile.dateJoined }}</dd>
+          <dd class="meta-value">{{ formProfile.dateJoined | appDate }}</dd>
         </div>
       </dl>
     </aside>
@@ -88,7 +88,7 @@
                 name="name"
                 [(ngModel)]="formProfile.name"
                 required
-                [disabled]="isSaving"
+                [disabled]="isSaving || readOnly()"
                 [placeholder]="'perfil.namePlaceholder' | translate">
             </div>
           </div>
@@ -131,7 +131,7 @@
           <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isSaving">
             {{ 'perfil.cancel' | translate }}
           </button>
-          <button type="submit" class="btn-save" [disabled]="pForm.invalid || isSaving">
+          <button type="submit" class="btn-save" [disabled]="pForm.invalid || isSaving || readOnly()">
             <svg *ngIf="!isSaving" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             <span>{{ (isSaving ? 'perfil.savingChanges' : 'perfil.saveChanges') | translate }}</span>
           </button>

@@ -1,9 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../shared/toast/toast.service';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 import { TranslationService } from '../../shared/i18n/translation.service';
+import { AppDatePipe } from '../../shared/format/app-date.pipe';
+import { SettingsService } from '../../settings/settings.service';
 
 export interface ProfileData {
   name: string;
@@ -18,13 +20,17 @@ export interface ProfileData {
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css'
 })
 export class PerfilComponent {
   private readonly toastService = inject(ToastService);
   private readonly translationService = inject(TranslationService);
+  private readonly settingsService = inject(SettingsService);
+
+  /** Accesibilidad > "Modo solo lectura": el perfil se puede ver pero no modificar. */
+  readonly readOnly = computed(() => this.settingsService.draft().readOnly);
 
   @Input() profile: ProfileData = {
     name: 'SENA Admin',
@@ -48,6 +54,10 @@ export class PerfilComponent {
   }
 
   onPhotoSelected(event: Event) {
+    if (this.readOnly()) {
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
@@ -66,10 +76,18 @@ export class PerfilComponent {
   }
 
   removePhoto() {
+    if (this.readOnly()) {
+      return;
+    }
+
     this.formProfile.photoUrl = '';
   }
 
   save() {
+    if (this.readOnly()) {
+      return;
+    }
+
     const name = this.formProfile.name.trim();
     const email = this.formProfile.email.trim().toLowerCase();
 

@@ -9,7 +9,7 @@
 }
 
 .settings-header {
-  padding: 4px 2px 14px;
+  padding: 4px 48px 14px 2px; /* deja libre el espacio del botón X del modal */
 }
 
 .eyebrow {
@@ -124,9 +124,9 @@
   gap: 16px;
   flex-wrap: wrap;
   margin-top: 18px;
-  padding: 14px 4px 4px;
+  padding: 14px 4px 18px;
   border-top: 1px solid #eef1f4;
-  background: #f4f6f7;
+  background: #f5f7f8;
 }
 
 :host-context(.shell.dark-mode) .settings-footer {

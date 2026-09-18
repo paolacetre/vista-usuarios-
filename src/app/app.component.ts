@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit, effect, inject } from '@angular/core';
+import { Component, HostListener, OnInit, computed, effect, inject } from '@angular/core';
 import { UsuariosComponent, User } from './views/usuarios/usuarios.component';
 import { PerfilComponent, ProfileData } from './views/perfil/perfil.component';
 import { SettingsComponent } from './settings/settings.component';
@@ -22,6 +22,8 @@ export class AppComponent implements OnInit {
   private readonly translationService = inject(TranslationService);
 
   readonly sessionRole = 'Administrador';
+  /** Preferencias > "Notificaciones del sistema": muestra u oculta la campana de la barra superior. */
+  readonly notificationsEnabled = computed(() => this.settingsService.draft().notifications);
   currentView: 'usuarios' | 'perfil' | 'configuracion' = 'usuarios';
   configurationOpen = false;
   darkMode = false;

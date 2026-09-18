@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, ElementRef, HostListener, Input, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, ViewChild, computed, inject } from '@angular/core';
 import { ToastService } from '../../shared/toast/toast.service';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 import { TranslationService } from '../../shared/i18n/translation.service';
+import { AppDatePipe, todayInTimezone } from '../../shared/format/app-date.pipe';
+import { SettingsService } from '../../settings/settings.service';
 
 export type UserRole = 'Admin' | 'Analista';
 export type UserStatus = 'Activo' | 'Inactivo';
@@ -29,7 +31,7 @@ export interface UserDraft {
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.css'
 })
@@ -50,6 +52,10 @@ export class UsuariosComponent {
 
   private readonly toastService = inject(ToastService);
   private readonly translationService = inject(TranslationService);
+  private readonly settingsService = inject(SettingsService);
+
+  /** Accesibilidad > "Modo solo lectura": bloquea crear, editar, cambiar estado, restablecer acceso y eliminar. */
+  readonly readOnly = computed(() => this.settingsService.draft().readOnly);
 
   readonly roles = ['Todos', 'Analista', 'Admin'] as const;
   readonly statuses = ['Todos', 'Activo', 'Inactivo'] as const;
@@ -172,6 +178,10 @@ export class UsuariosComponent {
   }
 
   startCreate(event?: Event) {
+    if (this.readOnly()) {
+      return;
+    }
+
     this.editingUserId = null;
     this.formError = '';
     this.formUser = this.emptyUserDraft();
@@ -179,7 +189,7 @@ export class UsuariosComponent {
   }
 
   startEdit(user: User, event?: Event) {
-    if (this.isUserPending(user)) {
+    if (this.readOnly() || this.isUserPending(user)) {
       return;
     }
 
@@ -198,7 +208,7 @@ export class UsuariosComponent {
   }
 
   saveUser() {
-    if (this.isFormPending) {
+    if (this.readOnly() || this.isFormPending) {
       return;
     }
 
@@ -234,7 +244,7 @@ export class UsuariosComponent {
             password,
             role: this.formUser.role,
             status: 'Activo',
-            date: new Date().toLocaleDateString('es-CO'),
+            date: todayInTimezone(this.settingsService.draft().timezone),
             initials: this.initialsFor(name),
           };
           this.users = [...this.users, user];
@@ -267,7 +277,7 @@ export class UsuariosComponent {
   }
 
   requestStatusChange(user: User, event: Pick<Event, 'currentTarget'>) {
-    if (this.isUserPending(user)) {
+    if (this.readOnly() || this.isUserPending(user)) {
       return;
     }
 
@@ -303,7 +313,7 @@ export class UsuariosComponent {
   }
 
   requestResetAccess(user: User, event: Pick<Event, 'currentTarget'>) {
-    if (this.isUserPending(user)) {
+    if (this.readOnly() || this.isUserPending(user)) {
       return;
     }
 
@@ -337,7 +347,7 @@ export class UsuariosComponent {
   }
 
   requestDelete(user: User, event: Pick<Event, 'currentTarget'>) {
-    if (this.isUserPending(user)) {
+    if (this.readOnly() || this.isUserPending(user)) {
       return;
     }
 

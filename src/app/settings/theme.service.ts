@@ -28,6 +28,10 @@ export class ThemeService {
     root.style.setProperty('--border-radius', `${config.borderRadius}px`);
     root.style.setProperty('--density-space', config.density === 'compacta' ? '0.75' : config.density === 'amplia' ? '1.25' : '1');
     root.setAttribute('data-density', config.density);
+    // Accesibilidad: banderas que styles.css y los componentes leen para reaccionar.
+    root.setAttribute('data-high-contrast', String(config.highContrast));
+    root.setAttribute('data-large-icons', String(config.largeIcons));
+    root.setAttribute('data-read-only', String(config.readOnly));
 
     this.applyFavicon(config.logos.favicon);
   }
