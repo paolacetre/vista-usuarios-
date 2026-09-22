@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { SettingsService } from '../../settings.service';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
@@ -25,7 +26,7 @@ export class AccessibilityTabComponent {
 
   constructor() {
     effect(() => this.form.patchValue(this.settings.draft(), { emitEvent: false }));
-    this.form.valueChanges.subscribe((value) => this.settings.updateDraft(value));
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => this.settings.updateDraft(value));
   }
 
   toggle(control: 'highContrast' | 'readOnly' | 'largeIcons'): void {

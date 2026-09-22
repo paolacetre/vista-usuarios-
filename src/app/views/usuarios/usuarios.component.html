@@ -121,7 +121,17 @@
           </div>
           <div class="field-item">
             <label for="form-password">{{ 'usuarios.fieldPassword' | translate }} <span *ngIf="editingUserId === null" class="required-star">*</span><span *ngIf="editingUserId !== null" class="optional-tag">{{ 'usuarios.optional' | translate }}</span></label>
-            <input id="form-password" name="password" type="password" [(ngModel)]="formUser.password" [required]="editingUserId === null" [disabled]="isFormPending" [placeholder]="(editingUserId === null ? 'usuarios.passwordPlaceholderNew' : 'usuarios.passwordPlaceholderEdit') | translate">
+            <input
+              id="form-password"
+              name="password"
+              type="password"
+              [(ngModel)]="formUser.password"
+              [required]="editingUserId === null"
+              [disabled]="isFormPending"
+              minlength="8"
+              pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}"
+              [placeholder]="(editingUserId === null ? 'usuarios.passwordPlaceholderNew' : 'usuarios.passwordPlaceholderEdit') | translate">
+            <span class="field-hint">{{ 'usuarios.passwordHint' | translate }}</span>
           </div>
           <div class="field-item">
             <label for="form-role">{{ 'usuarios.fieldRole' | translate }}</label>

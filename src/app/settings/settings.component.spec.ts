@@ -79,7 +79,7 @@ describe('SettingsComponent', () => {
     fixture.detectChanges();
 
     // El borrador vuelve a fábrica, no a lo guardado.
-    expect(settingsService.draft().accentColor).toBe('#49b009');
+    expect(settingsService.draft().accentColor).toBe('#7DB728');
     // Lo guardado no se toca hasta que se pulse "Guardar cambios".
     expect(settingsService.saved().accentColor).toBe('#123456');
     // Como fábrica != guardado, debe marcarse como cambios sin guardar.

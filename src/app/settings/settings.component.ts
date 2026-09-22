@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { SettingsService } from './settings.service';
 import { ToastService } from '../shared/toast/toast.service';
 import { TranslatePipe } from '../shared/i18n/translate.pipe';
 import { TranslationService } from '../shared/i18n/translation.service';
+import { LANGUAGE_OPTIONS, densityLabelKey, sizeLabelKey, themeLabelKey } from './settings.model';
 import { AppearanceTabComponent } from './tabs/appearance-tab/appearance-tab.component';
 import { LogosTabComponent } from './tabs/logos-tab/logos-tab.component';
 import { LanguageTabComponent } from './tabs/language-tab/language-tab.component';
@@ -55,6 +56,19 @@ export class SettingsComponent {
   readonly pendingSave = signal(false);
   readonly pendingReset = signal(false);
   isSavePending = false;
+
+  /**
+   * Panel "Preview en vivo": vive aquí (no en app-appearance-tab) para que
+   * quede fijo y visible sin importar la pestaña activa, en vez de
+   * desmontarse cada vez que se sale de Apariencia.
+   */
+  readonly draft = this.settingsService.draft;
+  readonly themeLabelKey = themeLabelKey;
+  readonly densityLabelKey = densityLabelKey;
+  readonly sizeLabelKey = sizeLabelKey;
+  readonly previewBars = [40, 25, 55, 50, 75, 45, 60];
+  readonly previewTableRows = [70, 55, 85];
+  readonly languageFlag = computed(() => LANGUAGE_OPTIONS.find((lang) => lang.id === this.draft().language)?.flag ?? '');
 
   readonly tabs: SettingsTabDef[] = [
     { id: 'apariencia', labelKey: 'settings.tab.apariencia', icon: '◉' },

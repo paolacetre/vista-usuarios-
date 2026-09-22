@@ -3,160 +3,455 @@
   width: 100%;
 }
 
+/* El host (app-settings) recibe `display:flex; flex-direction:column;
+   flex:1; min-height:0` desde app.component.css (es quien fija el alto del
+   modal). Este wrapper hereda esa columna: header queda fijo (flex-shrink:0)
+   y .settings-layout es el único que crece y reparte scroll. Las pestañas
+   viven dentro de .settings-layout (en .settings-left), no aquí. */
 .settings-wrapper {
   max-width: 1180px;
   margin: 0 auto;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .settings-header {
-  padding: 4px 48px 14px 2px; /* deja libre el espacio del botón X del modal */
+  flex-shrink: 0;
+  padding: 4px 48px 6px 2px; /* deja libre el espacio del botón X del modal */
 }
 
-.eyebrow {
-  font-size: 11px;
-  letter-spacing: 1.2px;
-  font-weight: 700;
-  color: #64748b;
+.settings-tagline {
   margin: 0 0 6px;
-  text-transform: uppercase;
+  color: var(--accent-color);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
+  letter-spacing: 0.1em;
 }
 
-:host-context(.shell.dark-mode) .eyebrow {
-  color: #94a3b8;
+.settings-disclaimer {
+  margin: 2px 0 0;
+  color: #8F8F8F;
+  font-size: var(--fs-body);
+}
+
+:host-context(.shell.dark-mode) .settings-disclaimer {
+  color: #D4D4D4;
 }
 
 .settings-header h1 {
-  font-size: 25px;
+  font-size: var(--fs-title);
   line-height: 1.15;
   margin: 0 0 6px;
   letter-spacing: -0.7px;
-  color: #111827;
-  font-weight: 800;
+  color: #001631;
+  font-weight: var(--fw-semibold);
 }
 
 :host-context(.shell.dark-mode) .settings-header h1 {
-  color: #f1f5f9;
-}
-
-.subtitle {
-  color: #4b5563;
-  margin: 0;
-  font-size: 13px;
-}
-
-:host-context(.shell.dark-mode) .subtitle {
-  color: #94a3b8;
+  color: #F1F1F1;
 }
 
 .settings-tabs {
+  flex-shrink: 0;
   display: flex;
-  gap: 4px;
+  flex-wrap: nowrap;
+  gap: 2px;
   overflow-x: auto;
-  border-bottom: 1px solid #dfe5ea;
-  margin-bottom: 16px;
+  border-bottom: 1px solid #D4D4D4;
+  margin-bottom: 10px;
   padding: 0 2px;
 }
 
 :host-context(.shell.dark-mode) .settings-tabs {
-  border-bottom-color: #2b4257;
+  border-bottom-color: #525252;
 }
 
 .settings-tabs button {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 3px;
   flex: 0 0 auto;
   border: 0;
   border-bottom: 3px solid transparent;
   background: transparent;
-  color: #5b6778;
-  padding: 8px 12px 7px;
-  font-weight: 700;
-  font-size: 13px;
+  color: #525252;
+  padding: 8px 5px 7px;
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .settings-tabs button:hover {
-  color: var(--primary-color, #193b73);
-  background: #f8fafc;
+  color: var(--primary-color);
+  background: #FFFFFF;
 }
 
 .settings-tabs button.active {
-  color: var(--primary-color, #193b73);
-  border-bottom-color: #2aa3d8;
+  color: var(--primary-color);
+  border-bottom-color: #1FACE3;
 }
 
 .settings-tabs button:focus-visible {
-  outline: 3px solid #b9e59f;
+  outline: 3px solid var(--accent-color);
   outline-offset: -3px;
 }
 
 :host-context(.shell.dark-mode) .settings-tabs button {
-  color: #94a3b8;
+  color: #D4D4D4;
 }
 
 :host-context(.shell.dark-mode) .settings-tabs button:hover {
-  color: #f1f5f9;
-  background: #1a2d3d;
+  color: #F1F1F1;
+  background: var(--dark-surface-hover);
 }
 
 :host-context(.shell.dark-mode) .settings-tabs button.active {
-  color: #f1f5f9;
-  border-bottom-color: #38bdf8;
+  color: #F1F1F1;
+  border-bottom-color: #1FACE3;
 }
 
 .tab-icon {
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1;
 }
 
+/* Layout de 2 columnas: pestaña activa a la izquierda + preview fijo a la
+   derecha. El preview vive aquí (no dentro de cada pestaña) para que no se
+   desmonte al cambiar de pestaña. `.settings-layout` ocupa el resto del alto
+   fijo (flex:1; min-height:0) y reparte ese alto entre ambas columnas por
+   igual (align-items:stretch). `.settings-body` tiene overflow-y:auto y es
+   quien scrollea en la práctica. `.preview-column` se diseñó compacto para
+   caber sin scroll en la mayoría de tamaños de ventana; conserva
+   overflow-y:auto solo como respaldo (nunca overflow:hidden), para que en
+   ventanas más bajas el contenido nunca quede recortado/invisible — antes
+   con overflow:hidden la tarjeta de resumen se cortaba a la mitad. */
+.settings-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 10px;
+  align-items: stretch;
+}
+
+@media (max-width: 880px) {
+  /* Una sola columna apilada no tiene sentido con un panel "sin scroll":
+     aquí el layout completo vuelve a fluir con la página como en cualquier
+     modal apilado en móvil. */
+  .settings-layout {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .settings-body,
+  .preview-column {
+    overflow: visible;
+  }
+}
+
+/* Contenedor del área izquierda: pestañas fijas arriba (flex-shrink:0,
+   definido en .settings-tabs) + contenido de la pestaña activa, que es
+   quien scrollea. Es uno de los 2 ítems de `.settings-layout` (el otro es
+   `.preview-column`), así que las pestañas ya no ocupan la franja completa
+   de arriba: quedan dentro de esta columna, junto al contenido que editan. */
+.settings-left {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .settings-body {
-  min-height: 260px;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+
+.settings-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.settings-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-body::-webkit-scrollbar-thumb {
+  background: #D4D4D4;
+  border-radius: 999px;
+}
+
+.settings-body::-webkit-scrollbar-thumb:hover {
+  background: #8F8F8F;
+}
+
+:host-context(.shell.dark-mode) .settings-body::-webkit-scrollbar-thumb {
+  background: #525252;
+}
+
+.preview-column {
+  min-width: 0;
+  min-height: 0;
+  /* El contenido está recortado a un tamaño deliberadamente compacto para
+     caber sin scroll incluso en una ventana de navegador baja (~650px de
+     alto de página, común en portátiles con la barra de marcadores visible).
+     overflow-y:auto se mantiene solo como respaldo extremo. */
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  scrollbar-width: thin;
+}
+
+.preview-column::-webkit-scrollbar {
+  width: 7px;
+}
+
+.preview-column::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.preview-column::-webkit-scrollbar-thumb {
+  background: #D4D4D4;
+  border-radius: 999px;
+}
+
+:host-context(.shell.dark-mode) .preview-column::-webkit-scrollbar-thumb {
+  background: #525252;
+}
+
+.preview-sticky-card {
+  background: linear-gradient(165deg, var(--accent-color-soft) 0%, #F1F1F1 55%);
+  border: 1px solid var(--accent-color-soft);
+  border-radius: var(--border-radius);
+  padding: 6px 14px;
+}
+
+:host-context(.shell.dark-mode) .preview-sticky-card {
+  background: linear-gradient(165deg, var(--accent-color-soft) 0%, var(--dark-surface) 55%);
+  border-color: #525252;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.preview-eyebrow {
+  margin: 0;
+  color: var(--accent-color);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
+  letter-spacing: 0.08em;
+}
+
+.preview-sticky-card h3 {
+  margin: 0 0 1px;
+  font-size: var(--fs-subtitle);
+  font-weight: var(--fw-semibold);
+  color: #001631;
+}
+
+:host-context(.shell.dark-mode) .preview-sticky-card h3 {
+  color: #F1F1F1;
+}
+
+.preview-note {
+  margin: 0 0 2px;
+  color: #525252;
+  font-size: var(--fs-body);
+  line-height: 1.15;
+}
+
+:host-context(.shell.dark-mode) .preview-note {
+  color: #D4D4D4;
+}
+
+/* Mini widgets (stats / gráfico / tabla) del panel de preview */
+.mini-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-bottom: 2px;
+}
+
+.mini-card,
+.mini-chart,
+.mini-table {
+  /* Sin min-width:0 un ítem de grid no baja de su ancho de contenido
+     (aquí, la palabra "CRECIMIENTO"), así que se sale de su columna de 1fr;
+     con overflow:hidden en .preview-column eso se veía cortado a mitad de
+     palabra en vez de ajustarse. */
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid var(--accent-color-soft);
+  border-radius: var(--border-radius);
+  padding: 3px 5px;
+}
+
+:host-context(.shell.dark-mode) .mini-card,
+:host-context(.shell.dark-mode) .mini-chart,
+:host-context(.shell.dark-mode) .mini-table {
+  background: var(--dark-surface);
+  border-color: #525252;
+}
+
+.mini-card .lab,
+.mini-chart .lab,
+.mini-table .lab {
+  display: block;
+  font-size: var(--fs-body);
+  letter-spacing: 0.01em;
+  color: #525252;
+  font-weight: var(--fw-regular);
+  margin-bottom: 2px;
+  overflow-wrap: break-word;
+}
+
+:host-context(.shell.dark-mode) .mini-card .lab,
+:host-context(.shell.dark-mode) .mini-chart .lab,
+:host-context(.shell.dark-mode) .mini-table .lab {
+  color: #D4D4D4;
+}
+
+.mini-card .val {
+  font-size: var(--fs-subtitle);
+  font-weight: var(--fw-semibold);
+  color: #001631;
+}
+
+:host-context(.shell.dark-mode) .mini-card .val {
+  color: #F1F1F1;
+}
+
+.mini-card .val.up {
+  color: var(--accent-color-hover);
+}
+
+.mini-chart {
+  margin-bottom: 1px;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 14px;
+}
+
+.bars i {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+}
+
+.mini-table .mtable-bar {
+  height: 5px;
+  border-radius: 3px;
+  margin-bottom: 0;
+}
+
+.mini-table .mtable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: #F1F1F1;
+  margin-bottom: 2px;
+}
+
+:host-context(.shell.dark-mode) .mini-table .mtable-track {
+  background: var(--dark-recessed);
+}
+
+.summary-card {
+  background: #ffffff;
+  border: 1px solid var(--accent-color-soft);
+  border-radius: var(--border-radius);
+  padding: 4px 11px;
+}
+
+:host-context(.shell.dark-mode) .summary-card {
+  background: var(--dark-surface);
+  border-color: #525252;
+}
+
+.summary-heading {
+  color: var(--accent-color);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-body);
+  padding: 1px 0;
+}
+
+.summary-row span {
+  color: #525252;
+}
+
+:host-context(.shell.dark-mode) .summary-row span {
+  color: #D4D4D4;
+}
+
+.summary-row b {
+  font-weight: var(--fw-regular);
+  color: #001631;
+  text-transform: capitalize;
+}
+
+:host-context(.shell.dark-mode) .summary-row b {
+  color: #F1F1F1;
 }
 
 .settings-footer {
-  position: sticky;
-  bottom: -1px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-top: 18px;
-  padding: 14px 4px 18px;
-  border-top: 1px solid #eef1f4;
-  background: #f5f7f8;
+  margin-top: 8px;
+  padding: 8px 4px 10px;
+  border-top: 1px solid #D4D4D4;
+  background: #F1F1F1;
 }
 
 :host-context(.shell.dark-mode) .settings-footer {
-  border-top-color: #223548;
-  background: #0f1b27;
+  border-top-color: #525252;
+  background: var(--dark-recessed);
 }
 
 .status-text {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 12.5px;
-  color: #6b7280;
-  font-weight: 600;
+  font-size: var(--fs-body);
+  color: #525252;
+  font-weight: var(--fw-regular);
 }
 
 :host-context(.shell.dark-mode) .status-text {
-  color: #94a3b8;
+  color: #D4D4D4;
 }
 
 .status-dot {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #9ca3af;
+  background: #8F8F8F;
   flex-shrink: 0;
 }
 
 .status-dot.dirty {
-  background: #f0a93b;
+  background: #FDC300;
 }
 
 .footer-actions {
@@ -168,21 +463,21 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #D4D4D4;
   background: #ffffff;
-  color: #374151;
+  color: #001631;
   padding: 9px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 13px;
+  border-radius: var(--border-radius);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
   cursor: pointer;
   transition: all 0.18s ease;
 }
 
 .secondary-btn:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-  color: #111827;
+  background: #F1F1F1;
+  border-color: #D4D4D4;
+  color: #001631;
 }
 
 .secondary-btn:disabled,
@@ -192,14 +487,14 @@
 }
 
 :host-context(.shell.dark-mode) .secondary-btn {
-  background: #1e293b;
-  border-color: #334155;
-  color: #e2e8f0;
+  background: var(--dark-surface);
+  border-color: #525252;
+  color: #D4D4D4;
 }
 
 :host-context(.shell.dark-mode) .secondary-btn:hover:not(:disabled) {
-  background: #334155;
-  border-color: #475569;
+  background: var(--dark-surface-hover);
+  border-color: #525252;
   color: #ffffff;
 }
 
@@ -220,26 +515,26 @@
   justify-content: center;
   gap: 8px;
   border: 0;
-  border-radius: 8px;
-  background: var(--accent-color, #49b009);
+  border-radius: var(--border-radius);
+  background: var(--accent-color);
   color: #ffffff;
   padding: 10px 20px;
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(73, 176, 9, 0.25);
   transition: all 0.18s ease;
 }
 
 .save-primary-btn:hover:not(:disabled) {
-  background: var(--accent-color-hover, #2e8e00);
+  background: var(--accent-color-hover, var(--accent-color-hover));
   box-shadow: 0 4px 8px rgba(46, 139, 0, 0.35);
   transform: translateY(-1px);
 }
 
 .secondary-btn:focus-visible,
 .save-primary-btn:focus-visible {
-  outline: 3px solid #b9e59f;
+  outline: 3px solid var(--accent-color);
   outline-offset: 2px;
 }
 
@@ -292,8 +587,8 @@
 
 .confirm-dialog {
   background: #ffffff;
-  border: 1px solid #e3e8ec;
-  border-radius: 18px;
+  border: 1px solid #D4D4D4;
+  border-radius: var(--border-radius);
   box-shadow: 0 20px 45px rgba(22, 34, 51, 0.18), 0 4px 12px rgba(22, 34, 51, 0.08);
   outline: 0;
   animation: settingsModalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -301,8 +596,8 @@
 }
 
 :host-context(.shell.dark-mode) .confirm-dialog {
-  background: #162534;
-  border-color: #223548;
+  background: var(--dark-surface);
+  border-color: #525252;
 }
 
 .alert-dialog {
@@ -320,7 +615,7 @@
 .dialog-icon {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--border-radius);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -337,23 +632,23 @@
 }
 
 .dialog-icon.activate-icon {
-  background: #eaf7e7;
-  color: #277918;
+  background: #EBF6E6;
+  color: var(--accent-color-hover);
 }
 
 .dialog-icon.reset-icon {
-  background: #ebf3ff;
-  color: #2563eb;
+  background: rgba(31, 172, 227, 0.14);
+  color: #1FACE3;
 }
 
 :host-context(.shell.dark-mode) .dialog-icon.activate-icon {
-  background: #153823;
-  color: #4ade80;
+  background: var(--accent-color-soft);
+  color: var(--accent-color);
 }
 
 :host-context(.shell.dark-mode) .dialog-icon.reset-icon {
-  background: #192e4d;
-  color: #60a5fa;
+  background: var(--primary-color-soft);
+  color: var(--primary-color);
 }
 
 .alert-dialog-titles {
@@ -361,34 +656,34 @@
 }
 
 .alert-dialog-titles h2 {
-  font-size: 17px;
-  font-weight: 700;
-  color: #162638;
+  font-size: var(--fs-subtitle);
+  font-weight: var(--fw-semibold);
+  color: #001631;
   margin: 0 0 6px;
   letter-spacing: -0.2px;
 }
 
 :host-context(.shell.dark-mode) .alert-dialog-titles h2 {
-  color: #edf4ff;
+  color: #F1F1F1;
 }
 
 .alert-dialog-titles p {
-  color: #5d6d7e;
-  font-size: 13px;
+  color: #525252;
+  font-size: var(--fs-body);
   line-height: 1.5;
   margin: 0;
 }
 
 :host-context(.shell.dark-mode) .alert-dialog-titles p {
-  color: #a9bacb;
+  color: #D4D4D4;
 }
 
 .alert-dialog-titles strong {
-  color: #1a293a;
+  color: #001631;
 }
 
 :host-context(.shell.dark-mode) .alert-dialog-titles strong {
-  color: #f1f5f9;
+  color: #F1F1F1;
 }
 
 .dialog-actions {
@@ -400,36 +695,37 @@
 }
 
 .secondary-button {
-  background: #edf2f5;
+  background: #F1F1F1;
   border: 0;
-  border-radius: 10px;
-  color: #273849;
+  border-radius: var(--border-radius);
+  color: #001631;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
   padding: 10px 18px;
   transition: background-color 0.18s ease;
 }
 
 .secondary-button:hover:not(:disabled) {
-  background: #e0e7ec;
+  background: #F1F1F1;
 }
 
 :host-context(.shell.dark-mode) .secondary-button {
-  background: #22374b;
-  color: #edf4ff;
+  background: var(--dark-recessed);
+  border: 1px solid #525252;
+  color: #F1F1F1;
 }
 
 :host-context(.shell.dark-mode) .secondary-button:hover:not(:disabled) {
-  background: #2c455c;
+  background: var(--dark-surface-hover);
 }
 
 .status-confirm-btn,
 .reset-confirm-btn {
   border: 0;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
+  border-radius: var(--border-radius);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
   padding: 10px 18px;
   cursor: pointer;
   transition: all 0.18s ease;
@@ -437,22 +733,22 @@
 }
 
 .status-confirm-btn.activate {
-  background: var(--accent-color, #49b009);
+  background: var(--accent-color);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .status-confirm-btn.activate:hover:not(:disabled) {
-  background: var(--accent-color-hover, #379b05);
+  background: var(--accent-color-hover, var(--accent-color-hover));
   transform: translateY(-1px);
 }
 
 .reset-confirm-btn {
-  background: #2563eb;
-  box-shadow: 0 2px 0 #1d4ed8;
+  background: #1FACE3;
+  box-shadow: 0 2px 0 #1FACE3;
 }
 
 .reset-confirm-btn:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: #1FACE3;
   transform: translateY(-1px);
 }
 

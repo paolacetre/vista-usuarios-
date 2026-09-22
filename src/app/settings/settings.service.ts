@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { DEFAULT_SETTINGS, SystemConfig, SystemLogos, cloneSettings } from './settings.model';
+import { DEFAULT_SETTINGS, SIZE_PRESETS, SystemConfig, SystemLogos, cloneSettings } from './settings.model';
 import { ThemeService } from './theme.service';
 
 const STORAGE_KEY = 'tdo_system_config';
@@ -145,10 +145,13 @@ export class SettingsService {
         return cloneSettings(DEFAULT_SETTINGS);
       }
 
-      const parsed = JSON.parse(raw);
+      // `fontFamily` y `borderRadius` ya no son ajustes (Work Sans / Suave fijos):
+      // se descartan si vienen de una versión anterior guardada.
+      const { fontFamily: _font, borderRadius: _radius, ...parsed } = JSON.parse(raw);
       return {
         ...cloneSettings(DEFAULT_SETTINGS),
         ...parsed,
+        fontSize: SIZE_PRESETS.reduce((best, preset) => (Math.abs(preset.value - parsed.fontSize) < Math.abs(best.value - parsed.fontSize) ? preset : best), SIZE_PRESETS[1]).value,
         theme: parsed.theme === 'oscuro' ? 'oscuro' : 'claro',
         density: ['compacta', 'comoda', 'amplia'].includes(parsed.density) ? parsed.density : 'comoda',
         logos: { ...DEFAULT_SETTINGS.logos, ...(parsed.logos ?? {}) }

@@ -226,6 +226,13 @@ export class UsuariosComponent {
       return;
     }
 
+    // La contraseña es opcional al editar (vacía = se conserva la actual),
+    // pero si se escribe una, debe cumplir la regla igual que al crear.
+    if (password && !this.isStrongPassword(password)) {
+      this.formError = this.translationService.translate('usuarios.validationPasswordStrength');
+      return;
+    }
+
     const duplicateEmail = this.users.some((user) => user.email.toLowerCase() === email && user.id !== this.editingUserId);
     if (duplicateEmail) {
       this.formError = this.translationService.translate('usuarios.validationDuplicateEmail');
@@ -446,6 +453,11 @@ export class UsuariosComponent {
 
   private initialsFor(name: string) {
     return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+  }
+
+  /** Mínimo 8 caracteres, con al menos una mayúscula, una minúscula y un número. */
+  private isStrongPassword(password: string): boolean {
+    return password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password);
   }
 
   private openForm(event?: Event) {

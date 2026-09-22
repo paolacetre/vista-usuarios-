@@ -1,0 +1,69 @@
+<!-- Backdrop: clic fuera de la tarjeta cierra el modal. -->
+<div class="dialog-backdrop" (click)="close()">
+  <section
+    class="states-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="states-modal-title"
+    tabindex="-1"
+    (click)="$event.stopPropagation()">
+    <button type="button" class="states-modal-close" [attr.aria-label]="'appearance.statesModalCloseAria' | translate" (click)="close()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+
+    <!-- Única región con scroll (si hace falta): la tarjeta exterior
+         (.states-modal) se queda con overflow:hidden para que su
+         border-radius siempre se vea limpio — un scrollbar nativo sobre un
+         elemento con esquinas redondeadas las recorta visualmente en las
+         puntas donde aparece la barra. -->
+    <div class="states-modal-scroll">
+      <div class="states-modal-header">
+        <div class="states-modal-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        </div>
+        <div>
+          <h2 id="states-modal-title">{{ 'appearance.statesCardTitle' | translate }}</h2>
+          <p>{{ 'appearance.statesCardDesc' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="states-modal-body">
+        <div class="state-detail-row" *ngFor="let state of stateItems" [ngClass]="state.cls">
+          <div class="state-detail-icon" aria-hidden="true">
+            <svg *ngIf="state.cls === 'ok'" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg *ngIf="state.cls === 'error'" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            <svg *ngIf="state.cls === 'warn'" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+          </div>
+
+          <div class="state-detail-main">
+            <h3>{{ ('appearance.state.' + state.key + '.title') | translate }}</h3>
+            <p>{{ ('appearance.state.' + state.key + '.message') | translate }}</p>
+          </div>
+
+          <div class="state-detail-meta">
+            <div class="state-detail-meta-item">
+              <span class="meta-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <div>
+                <strong>{{ 'appearance.stateUseLabel' | translate }}</strong>
+                <span>{{ ('appearance.state.' + state.key + '.use') | translate }}</span>
+              </div>
+            </div>
+            <div class="state-detail-meta-item">
+              <span class="meta-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+              </span>
+              <div>
+                <strong>{{ 'appearance.stateWhenLabel' | translate }}</strong>
+                <span>{{ ('appearance.state.' + state.key + '.when') | translate }}</span>
+              </div>
+            </div>
+          </div>
+
+          <span class="state-detail-badge">{{ ('appearance.state.' + state.key + '.badge') | translate }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

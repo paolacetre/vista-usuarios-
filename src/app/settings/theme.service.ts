@@ -1,39 +1,57 @@
-import { Injectable } from '@angular/core';
-import { SystemConfig } from './settings.model';
+import { Injectable, NgZone } from '@angular/core';
+import { APP_FONT_FAMILY, SOFT_BORDER_RADIUS, SystemConfig } from './settings.model';
 
 /**
  * Aplica los tokens de diseño (colores, tipografía, tamaño, radios, densidad)
  * como variables CSS en vivo sobre `document.documentElement`. Es el único
  * lugar que toca el DOM global para theming; `SettingsService` decide *cuándo*
  * llamarlo (cada cambio de borrador, guardado, restablecido o descartado).
+ *
+ * Las mutaciones DOM de CSS custom properties se ejecutan fuera de la zona
+ * de Angular para que no dispensen ciclos de Change Detection en toda la
+ * app. Los componentes que necesitan reaccionar al tema lo hacen vía
+ * señales (`draft()`), no observando el DOM.
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
+  constructor(private readonly ngZone: NgZone) {}
+
   apply(config: SystemConfig): void {
     if (typeof document === 'undefined') {
       return;
     }
 
-    const root = document.documentElement;
-    root.style.setProperty('--primary-color', config.primaryColor);
-    root.style.setProperty('--primary-color-hover', this.adjustColor(config.primaryColor, -12));
-    root.style.setProperty('--primary-color-light', `${config.primaryColor}18`);
-    root.style.setProperty('--primary-color-dark', this.adjustColor(config.primaryColor, -24));
-    root.style.setProperty('--primary-color-soft', this.toRgba(config.primaryColor, 0.14));
-    root.style.setProperty('--accent-color', config.accentColor);
-    root.style.setProperty('--accent-color-hover', this.adjustColor(config.accentColor, -12));
-    root.style.setProperty('--accent-color-soft', this.toRgba(config.accentColor, 0.2));
-    root.style.setProperty('--app-font-family', config.fontFamily);
-    root.style.setProperty('--app-font-size', `${config.fontSize}px`);
-    root.style.setProperty('--border-radius', `${config.borderRadius}px`);
-    root.style.setProperty('--density-space', config.density === 'compacta' ? '0.75' : config.density === 'amplia' ? '1.25' : '1');
-    root.setAttribute('data-density', config.density);
-    // Accesibilidad: banderas que styles.css y los componentes leen para reaccionar.
-    root.setAttribute('data-high-contrast', String(config.highContrast));
-    root.setAttribute('data-large-icons', String(config.largeIcons));
-    root.setAttribute('data-read-only', String(config.readOnly));
+    this.ngZone.runOutsideAngular(() => {
+      const root = document.documentElement;
+      root.style.setProperty('--primary-color', config.primaryColor);
+      root.style.setProperty('--primary-color-hover', this.adjustColor(config.primaryColor, -12));
+      root.style.setProperty('--primary-color-light', `${config.primaryColor}18`);
+      root.style.setProperty('--primary-color-dark', this.adjustColor(config.primaryColor, -24));
+      root.style.setProperty('--primary-color-soft', this.toRgba(config.primaryColor, 0.14));
+      // Sobre fondo oscuro un color principal muy oscuro (p. ej. #001631) se
+      // pierde: styles.css usa esta variante en `.shell.dark-mode`.
+      const onDark = this.luminance(config.primaryColor) < 0.15 ? '#1FACE3' : config.primaryColor;
+      root.style.setProperty('--primary-on-dark', onDark);
+      root.style.setProperty('--primary-on-dark-light', `${onDark}18`);
+      root.style.setProperty('--primary-on-dark-soft', this.toRgba(onDark, 0.14));
+      root.style.setProperty('--accent-color', config.accentColor);
+      root.style.setProperty('--accent-color-hover', this.adjustColor(config.accentColor, -12));
+      root.style.setProperty('--accent-color-soft', this.toRgba(config.accentColor, 0.2));
+      // Fuente y radio son constantes del sistema (Work Sans / Suave), no ajustes.
+      root.style.setProperty('--app-font-family', APP_FONT_FAMILY);
+      root.style.setProperty('--border-radius', `${SOFT_BORDER_RADIUS}px`);
+      // Escala de texto: 1 = párrafo 16px, títulos 26px, subtítulos 20px (styles.css).
+      root.style.setProperty('--app-font-size', `${config.fontSize}px`);
+      root.style.setProperty('--type-scale', String(config.fontSize / 16));
+      root.style.setProperty('--density-space', config.density === 'compacta' ? '0.75' : config.density === 'amplia' ? '1.25' : '1');
+      root.setAttribute('data-density', config.density);
+      // Accesibilidad: banderas que styles.css y los componentes leen para reaccionar.
+      root.setAttribute('data-high-contrast', String(config.highContrast));
+      root.setAttribute('data-large-icons', String(config.largeIcons));
+      root.setAttribute('data-read-only', String(config.readOnly));
 
-    this.applyFavicon(config.logos.favicon);
+      this.applyFavicon(config.logos.favicon);
+    });
   }
 
   /** Actualiza el <link rel="icon"> real de la pestaña del navegador (crea el tag si no existe). */
@@ -65,6 +83,16 @@ export class ThemeService {
       return 'image/x-icon';
     }
     return 'image/png';
+  }
+
+  /** Luminancia relativa aproximada (0 = negro, 1 = blanco). */
+  private luminance(color: string): number {
+    const value = color.replace('#', '');
+    if (value.length !== 6) {
+      return 1;
+    }
+    const [r, g, b] = [0, 2, 4].map((index) => parseInt(value.slice(index, index + 2), 16) / 255);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 
   private adjustColor(color: string, amount: number): string {

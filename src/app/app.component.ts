@@ -76,17 +76,25 @@ export class AppComponent implements OnInit {
     }
   }
 
+  /**
+   * Antes esto solo tocaba un flag local + una clave de localStorage sin
+   * relación con SettingsService, así que cualquier interacción con
+   * Configuración (incluso solo abrirla y cerrarla sin cambiar nada) volvía
+   * a aplicar `draft().theme` vía el effect() del constructor y deshacía el
+   * toggle en silencio. Ahora este botón es un atajo que escribe y guarda
+   * directamente el mismo `theme` que usa la pestaña Apariencia, así que
+   * ambos quedan sincronizados y no se pisan entre sí.
+   */
   toggleDarkMode() {
-    this.darkMode = !this.darkMode;
-    try {
-      localStorage.setItem('tdo_dark_mode', JSON.stringify(this.darkMode));
-    } catch {
-      // Ignore local storage error in sandboxes
-    }
+    const nextTheme = this.settingsService.draft().theme === 'oscuro' ? 'claro' : 'oscuro';
+    this.settingsService.updateDraft({ theme: nextTheme });
+    this.settingsService.save().subscribe();
   }
 
   notifyNoNewNotifications() {
-    this.toastService.info(this.translationService.translate('notifications.none'));
+    // Solo existen 3 estados (Aprobado/Rechazado/Advertencia): un aviso que no
+    // es éxito ni error se muestra como Advertencia.
+    this.toastService.warning(this.translationService.translate('notifications.none'));
   }
 
   onProfileSaved(updated: ProfileData) {

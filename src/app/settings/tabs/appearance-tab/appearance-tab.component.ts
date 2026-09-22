@@ -1,30 +1,54 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { SettingsService } from '../../settings.service';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
+import { TranslationService } from '../../../shared/i18n/translation.service';
+import { StatesModalComponent } from './states-modal/states-modal.component';
 import {
   ACCENT_COLOR_PRESETS,
   DENSITY_OPTIONS,
-  FONT_OPTIONS,
-  FontOption,
+  GLOBAL_COLOR_CATALOG,
   PRIMARY_COLOR_PRESETS,
-  RADIUS_PRESETS,
   SIZE_PRESETS,
   THEME_OPTIONS,
-  DensityOption
+  DensityOption,
+  GlobalColorEntry,
+  densityLabelKey,
+  sizeLabelKey,
+  themeLabelKey
 } from '../../settings.model';
+
+const HEX_COLOR_PATTERN = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
+/** Ventana de debounce del buscador de color: filtra solo tras una pausa al escribir, no en cada tecla. */
+const COLOR_SEARCH_DEBOUNCE_MS = 250;
+/** Tope de filas que se insertan en el desplegable, para no inflar el DOM con cada tecla. */
+const MAX_COLOR_RESULTS = 12;
+
+/** Quita tildes/diacríticos y pasa a minúsculas, para que "carmesi" encuentre "Carmesí". */
+function normalizeSearchText(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+}
 
 @Component({
   selector: 'app-appearance-tab',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslatePipe, StatesModalComponent],
   templateUrl: './appearance-tab.component.html',
-  styleUrl: './appearance-tab.component.scss'
+  styleUrl: './appearance-tab.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppearanceTabComponent {
   private readonly settings = inject(SettingsService);
   private readonly fb = inject(FormBuilder);
+  private readonly translation = inject(TranslationService);
 
   readonly draft = this.settings.draft;
 
@@ -32,19 +56,55 @@ export class AppearanceTabComponent {
   readonly densityOptions = DENSITY_OPTIONS;
   readonly primaryPresets = PRIMARY_COLOR_PRESETS;
   readonly accentPresets = ACCENT_COLOR_PRESETS;
-  readonly fontOptions = FONT_OPTIONS;
   readonly sizePresets = SIZE_PRESETS;
-  readonly radiusPresets = RADIUS_PRESETS;
 
-  showFontModal = false;
-  showCustomPrimaryPicker = false;
+  /** Controla el modal de "Estados y mensajes" (informativo, sin cambios que guardar). */
+  showStatesModal = signal(false);
 
-  readonly previewBars = [40, 25, 55, 50, 75, 45, 60];
-  readonly previewTableRows = [70, 55, 85];
+  openStatesModal(): void {
+    this.showStatesModal.set(true);
+  }
+
+  closeStatesModal(): void {
+    this.showStatesModal.set(false);
+  }
+
+  /**
+   * Único buscador para ambas paletas (Color principal y Color de acción).
+   * Es el único punto de entrada para colores personalizados: ya no hay
+   * gotero/selector nativo. La paleta de círculos (primaryPresets/
+   * accentPresets) se muestra siempre completa y sin filtrar — el buscador
+   * solo despliega coincidencias del catálogo global en su propio panel, sin
+   * tocar esa lista fija.
+   *
+   * Estado dividido en dos capas para que escribir nunca se sienta lento:
+   * - `colorQuery` (campo plano) sigue el input tecla por tecla, sin demora
+   *   visual — es puramente estado LOCAL de la búsqueda.
+   * - `colorQuery$` → `debouncedQuery` (signal) es quien alimenta el filtrado
+   *   real, con `debounceTime` + `distinctUntilChanged`: el catálogo (~70
+   *   colores) solo se recorre una vez que el usuario hace una pausa al
+   *   escribir, no en cada pulsación.
+   * `globalColorMatches` es un `computed()`, no un método: Angular solo lo
+   * vuelve a calcular cuando `debouncedQuery` realmente cambia de valor, no
+   * en cada ciclo de detección de cambios (a diferencia de un método de
+   * plantilla, que se re-ejecuta en cada CD aunque nada relevante cambie).
+   * Aplicar un color (setPrimaryColor/setAccentColor, que sí toca el estado
+   * global vía el formulario) es una escritura de signal totalmente
+   * independiente de este pipeline de búsqueda, así que nunca lo bloquea.
+   */
+  colorQuery = '';
+  colorDropdownOpen = false;
+  private readonly colorQuery$ = new Subject<string>();
+  private readonly debouncedQuery = signal('');
+
+  /** Etiquetas de tema/densidad/tamaño: definidas una sola vez en settings.model.ts. */
+  readonly themeLabelKey = themeLabelKey;
+  readonly densityLabelKey = densityLabelKey;
+  readonly sizeLabelKey = sizeLabelKey;
 
   /**
    * Un único FormGroup reactivo por esta pestaña (theme/density/colores/
-   * tipografía/tamaño/radio). Cada cambio se propaga al SettingsService, que
+   * tamaño de texto). Cada cambio se propaga al SettingsService, que
    * lo aplica en vivo a toda la interfaz vía ThemeService. Un `effect()`
    * mantiene el formulario sincronizado si el borrador cambia por fuera
    * (por ejemplo, al pulsar "Restablecer" en el footer).
@@ -54,9 +114,7 @@ export class AppearanceTabComponent {
     density: this.settings.draft().density,
     primaryColor: this.settings.draft().primaryColor,
     accentColor: this.settings.draft().accentColor,
-    fontFamily: this.settings.draft().fontFamily,
-    fontSize: this.settings.draft().fontSize,
-    borderRadius: this.settings.draft().borderRadius
+    fontSize: this.settings.draft().fontSize
   });
 
   constructor() {
@@ -64,7 +122,11 @@ export class AppearanceTabComponent {
       this.form.patchValue(this.settings.draft(), { emitEvent: false });
     });
 
-    this.form.valueChanges.subscribe((value) => this.settings.updateDraft(value));
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => this.settings.updateDraft(value));
+
+    this.colorQuery$
+      .pipe(debounceTime(COLOR_SEARCH_DEBOUNCE_MS), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe((value) => this.debouncedQuery.set(value));
   }
 
   setDensity(density: DensityOption): void {
@@ -79,62 +141,106 @@ export class AppearanceTabComponent {
     this.form.controls.accentColor.setValue(color);
   }
 
-  /** true cuando el color guardado no coincide con ninguno de los 9 swatches de marca. */
-  isCustomPrimaryColor(): boolean {
-    const current = this.form.controls.primaryColor.value.toLowerCase();
-    return !this.primaryPresets.some((preset) => preset.color.toLowerCase() === current);
-  }
-
-  toggleCustomPrimaryPicker(): void {
-    this.showCustomPrimaryPicker = !this.showCustomPrimaryPicker;
-  }
-
-  themeLabelKey(id: string): string {
-    return id === 'oscuro' ? 'appearance.themeOscuro' : 'appearance.themeClaro';
-  }
-
-  densityLabelKey(id: DensityOption): string {
-    if (id === 'compacta') return 'appearance.densityCompacta';
-    if (id === 'amplia') return 'appearance.densityAmplia';
-    return 'appearance.densityComoda';
-  }
-
-  sizeLabelKey(value: number): string {
-    if (value <= 13) return 'appearance.sizePequeno';
-    if (value <= 15) return 'appearance.sizeNormal';
-    if (value <= 17) return 'appearance.sizeGrande';
-    return 'appearance.sizeMuyGrande';
-  }
-
-  radiusLabelKey(value: number): string {
-    if (value <= 4) return 'appearance.radiusRecto';
-    if (value <= 8) return 'appearance.radiusSuave';
-    if (value <= 12) return 'appearance.radiusRedondeado';
-    return 'appearance.radiusPildora';
-  }
-
   setFontSize(size: number): void {
     this.form.controls.fontSize.setValue(size);
   }
 
-  setBorderRadius(radius: number): void {
-    this.form.controls.borderRadius.setValue(radius);
+  /** Nombre a mostrar de una entrada del catálogo global según el idioma activo (es/en/pt). */
+  globalColorDisplayName(entry: GlobalColorEntry): string {
+    const lang = this.translation.language();
+    if (lang === 'en') return entry.nameEn;
+    if (lang === 'pt') return entry.namePt;
+    return entry.nameEs;
   }
 
-  openFontModal(): void {
-    this.showFontModal = true;
+  /** Cada tecla actualiza el input al instante; solo el filtrado real se debounce. */
+  onColorQueryChange(value: string): void {
+    this.colorQuery = value;
+    this.colorQuery$.next(value);
   }
 
-  closeFontModal(): void {
-    this.showFontModal = false;
+  /**
+   * Si lo escrito en el buscador es un código hex válido (con o sin '#',
+   * 3 o 6 dígitos) que no está ya en el catálogo, arma una entrada "Color
+   * personalizado" al vuelo — así el buscador cubre también un código que no
+   * tiene nombre propio, sin necesitar el selector nativo del sistema.
+   */
+  private customHexEntry(query: string): GlobalColorEntry | null {
+    const term = query.trim();
+    if (!HEX_COLOR_PATTERN.test(term)) return null;
+
+    const hex = term.startsWith('#') ? term : `#${term}`;
+    const normalized = hex.length === 4
+      ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+      : hex;
+
+    const known = GLOBAL_COLOR_CATALOG.find((entry) => entry.color.toLowerCase() === normalized.toLowerCase());
+    if (known) return null;
+
+    return {
+      id: 'custom-hex',
+      nameEs: 'Color personalizado',
+      nameEn: 'Custom color',
+      namePt: 'Cor personalizada',
+      color: normalized.toUpperCase()
+    };
   }
 
-  selectFont(font: FontOption): void {
-    this.form.controls.fontFamily.setValue(font.fontFamily);
-    this.showFontModal = false;
+  /**
+   * Catálogo global de colores (no solo los swatches de marca), ya en
+   * memoria (ver GLOBAL_COLOR_CATALOG): busca por nombre en español, inglés
+   * o portugués y por código hex, sin tildes de ningún lado (normalize) —
+   * "carmesi"/"marron" encuentran "Carmesí"/"Marrón". Si lo escrito es un
+   * hex válido sin nombre en el catálogo, se agrega como primer resultado
+   * ("Color personalizado"). Se limita a MAX_COLOR_RESULTS filas para no
+   * insertar de golpe cientos de nodos en el DOM.
+   *
+   * `computed()` en vez de método de plantilla: solo se recalcula cuando
+   * `debouncedQuery` cambia de valor (no en cada detección de cambios).
+   */
+  readonly globalColorMatches = computed<GlobalColorEntry[]>(() => {
+    const rawQuery = this.debouncedQuery();
+    const term = normalizeSearchText(rawQuery);
+    if (!term) return [];
+
+    const nameMatches = GLOBAL_COLOR_CATALOG.filter(
+      (entry) =>
+        normalizeSearchText(entry.nameEs).includes(term) ||
+        normalizeSearchText(entry.nameEn).includes(term) ||
+        normalizeSearchText(entry.namePt).includes(term) ||
+        entry.color.toLowerCase().includes(term)
+    );
+
+    const customHex = this.customHexEntry(rawQuery);
+    const matches = customHex ? [customHex, ...nameMatches] : nameMatches;
+    return matches.slice(0, MAX_COLOR_RESULTS);
+  });
+
+  trackByColorEntry(_index: number, entry: GlobalColorEntry): string {
+    return entry.id;
   }
 
-  currentFont(): FontOption {
-    return this.fontOptions.find((font) => font.fontFamily === this.form.controls.fontFamily.value) ?? this.fontOptions[0];
+  onColorSearchFocus(): void {
+    this.colorDropdownOpen = true;
+  }
+
+  /**
+   * Aplica un color (del catálogo global o un hex escrito directamente) al
+   * destino elegido. Solo actualiza el valor activo de esa sección — la
+   * paleta de círculos predeterminados no cambia nunca desde acá. Limpia el
+   * buscador de inmediato (sin esperar el debounce) para que el desplegable
+   * no quede "congelado" mostrando el resultado ya aplicado.
+   */
+  applyGlobalColor(entry: GlobalColorEntry, target: 'primary' | 'accent'): void {
+    if (target === 'primary') {
+      this.setPrimaryColor(entry.color);
+    } else {
+      this.setAccentColor(entry.color);
+    }
+
+    this.colorQuery = '';
+    this.colorQuery$.next('');
+    this.debouncedQuery.set('');
+    this.colorDropdownOpen = false;
   }
 }

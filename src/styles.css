@@ -1,17 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&display=swap');
+/* Sistema visual: Figma "Ecosistema visual nivel fábrica". Solo Work Sans. */
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap');
 
 :root {
-  --primary-color: #193b73;
-  --primary-color-hover: #102c5b;
-  --primary-color-light: #193b7318;
-  --primary-color-dark: #001f5b;
-  --primary-color-soft: rgba(25, 59, 115, 0.14);
-  --accent-color: #49b009;
-  --accent-color-hover: #2e8e00;
-  --accent-color-soft: rgba(73, 176, 9, 0.2);
-  --app-font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --app-font-size: 15px;
-  --border-radius: 12px;
+  /* Brand Colors. `--primary-color` / `--accent-color` los reemplaza ThemeService
+     (colores de marca, o el "Personalizado" elegido en Configuración). */
+  --primary-color: #001631;
+  --primary-color-hover: #00122a;
+  --primary-color-light: #00163118;
+  --primary-color-dark: #000c1c;
+  --primary-color-soft: rgba(0, 22, 49, 0.14);
+  --accent-color: #7db728;
+  --accent-color-hover: #6a9d20;
+  --accent-color-soft: rgba(125, 183, 40, 0.2);
+  --primary-on-dark: #1face3;
+  --primary-on-dark-light: #1face318;
+  --primary-on-dark-soft: rgba(31, 172, 227, 0.14);
+  --brand-blue: #1face3;
+  --neutral-50: #f1f1f1;
+  --neutral-100: #d4d4d4;
+  --neutral-400: #8f8f8f;
+  --neutral-700: #525252;
+  --neutral-900: #303030;
+
+  /* Estados (únicos tres): Aprobado / Rechazado / Advertencia. */
+  --state-ok-bg: #ebf6e6;
+  --state-ok-fg: #349a00;
+  --state-error-bg: #ffe9e9;
+  --state-error-fg: #e81c1c;
+  --state-warn-bg: #fff9e6;
+  --state-warn-fg: #d97706;
+  --state-warn-accent: #fdc300;
+
+  /* Tipografía: Work Sans, 3 niveles. `--type-scale` lo fija ThemeService
+     (opciones seleccionables Pequeño/Normal/Grande/Muy grande; Normal = 1). */
+  --app-font-family: 'Work Sans', sans-serif;
+  --app-font-size: 16px;
+  --type-scale: 1;
+  --fs-title: calc(26px * var(--type-scale));
+  --fs-subtitle: calc(20px * var(--type-scale));
+  --fs-body: calc(16px * var(--type-scale));
+  --fw-semibold: 600;
+  --fw-regular: 400;
+
+  /* Radio único: "Suave" (16px, como los botones en Figma). */
+  --border-radius: 16px;
   --density-space: 1;
 }
 
@@ -22,14 +54,33 @@
 html, body {
   margin: 0;
   min-width: 320px;
-  background: #f8fafb;
+  background: var(--neutral-50);
+  color: #001631;
   font-family: var(--app-font-family);
-  font-size: var(--app-font-size);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
 }
 
 button, input, select, textarea {
   font-family: inherit;
   font-size: inherit;
+}
+
+/* Jerarquía: Títulos 26 / Subtítulos 20 (Semibold) y párrafos 16 (Regular). */
+h1 {
+  font-size: var(--fs-title) !important;
+}
+
+h2, h3, h4, h5, h6 {
+  font-size: var(--fs-subtitle) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--fw-semibold) !important;
+}
+
+strong, b, th, dt, legend, caption {
+  font-weight: var(--fw-regular);
 }
 
 .sr-only {
@@ -42,6 +93,51 @@ button, input, select, textarea {
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
+}
+
+/* Modo oscuro: el color principal se sustituye por su variante legible, y se
+   define una jerarquía de elevación (2 niveles) para que tarjetas, barra
+   lateral/superior y modales se distingan del fondo, igual que en modo claro
+   el blanco puro se distingue del gris #F1F1F1 de la página.
+   --dark-surface/-hover son el navy de marca (#001631) con una superposición
+   blanca ligera (8%/14%): mismo método que --primary-color-hover/-dark ya
+   usa con adjustColor, no un color nuevo. --dark-recessed es el navy plano:
+   se usa en los campos "hundidos" dentro de una tarjeta (buscador, cabecera
+   de tabla), igual que el claro usa #F1F1F1 dentro de una tarjeta blanca. */
+.shell.dark-mode {
+  --primary-color: var(--primary-on-dark);
+  --primary-color-light: var(--primary-on-dark-light);
+  --primary-color-soft: var(--primary-on-dark-soft);
+  --dark-surface: #142941;
+  --dark-surface-hover: #1c3550;
+  --dark-recessed: #001631;
+}
+
+/* ---- Estados y mensajes ----
+   Aprobado: la acción se completó. Rechazado: la acción falló o fue denegada.
+   Advertencia: requiere atención pero no bloquea. */
+.state-message {
+  display: block;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--border-radius);
+  border-left: 4px solid currentColor;
+}
+
+.state-message.ok {
+  background: var(--state-ok-bg);
+  color: var(--state-ok-fg);
+}
+
+.state-message.error {
+  background: var(--state-error-bg);
+  color: var(--state-error-fg);
+}
+
+.state-message.warn {
+  background: var(--state-warn-bg);
+  color: var(--state-warn-fg);
+  border-left-color: var(--state-warn-accent);
 }
 
 /* The density scale is applied globally after saving the configuration. */
@@ -104,24 +200,6 @@ button, input, select, textarea {
   padding-bottom: 14px;
 }
 
-:root[data-density="compacta"] .config-card,
-:root[data-density="compacta"] .filter-card,
-:root[data-density="compacta"] .results-card,
-:root[data-density="compacta"] .users-table,
-:root[data-density="compacta"] .identity-card,
-:root[data-density="compacta"] .form-card {
-  border-radius: max(4px, calc(var(--border-radius) - 4px));
-}
-
-:root[data-density="amplia"] .config-card,
-:root[data-density="amplia"] .filter-card,
-:root[data-density="amplia"] .results-card,
-:root[data-density="amplia"] .users-table,
-:root[data-density="amplia"] .identity-card,
-:root[data-density="amplia"] .form-card {
-  border-radius: calc(var(--border-radius) + 2px);
-}
-
 :root[data-density="compacta"] .primary-button,
 :root[data-density="compacta"] .btn-save,
 :root[data-density="compacta"] .save-button {
@@ -165,10 +243,11 @@ button, input, select, textarea {
   opacity: 0.45;
 }
 
-/* Alto contraste: texto puro sobre el fondo, bordes marcados y foco muy visible. */
+/* Alto contraste: texto de marca (#001631) sobre el fondo, bordes marcados y
+   foco muy visible. Solo usa colores del sistema. */
 :root[data-high-contrast="true"] .shell {
-  --hc-fg: #000000;
-  --hc-border: #000000;
+  --hc-fg: #001631;
+  --hc-border: #001631;
 }
 
 :root[data-high-contrast="true"] .shell.dark-mode {
@@ -176,7 +255,7 @@ button, input, select, textarea {
   --hc-border: #ffffff;
 }
 
-:root[data-high-contrast="true"] .shell :is(h1, h2, h3, p, label, small, strong, td, th, dt, dd, li, .email, .card-description, .subtitle, .eyebrow, .toggle-row-text span):not(:is(.results-card, button, .role-pill, .status-pill, .fo-badge, .role-badge, .status-badge) *):not(.role-pill, .status-pill, .fo-badge, .role-badge, .status-badge) {
+:root[data-high-contrast="true"] .shell :is(h1, h2, h3, p, label, small, strong, td, th, dt, dd, li, .email, .card-description, .subtitle, .eyebrow, .toggle-row-text span):not(:is(.results-card, button, .role-pill, .status-pill, .fo-badge, .role-badge, .status-badge, .state-message) *):not(.role-pill, .status-pill, .fo-badge, .role-badge, .status-badge, .state-message) {
   color: var(--hc-fg) !important;
 }
 
@@ -185,7 +264,16 @@ button, input, select, textarea {
 }
 
 :root[data-high-contrast="true"] :focus-visible {
-  outline: 3px solid #ffbf00 !important;
+  outline: 3px solid var(--state-warn-accent) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 5px #000000 !important;
+  box-shadow: 0 0 0 5px #001631 !important;
+}
+
+/* Modo oscuro: texto secundario legible sobre superficies oscuras. */
+.shell.dark-mode :is(small, .email, .card-description, .subtitle, .eyebrow, .control-help, .state-usage) {
+  color: var(--neutral-100) !important;
+}
+
+.shell.dark-mode .results-card :is(.result-copy, .results-count, .eyebrow) {
+  color: #f1f1f1 !important;
 }

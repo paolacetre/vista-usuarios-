@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ToastService } from './toast.service';
 import { ToastItemComponent } from './toast-item.component';
+import { ToastMessage } from './toast.model';
 
 /**
  * Punto único de renderizado de los toasts de toda la app. Se monta una sola
@@ -23,5 +24,9 @@ export class ToastContainerComponent {
 
   dismiss(id: number): void {
     this.toastService.dismiss(id);
+  }
+
+  trackByToastId(_index: number, toast: ToastMessage): number {
+    return toast.id;
   }
 }

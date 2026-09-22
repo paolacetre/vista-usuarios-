@@ -3,7 +3,6 @@ import { ToastMessage, ToastType } from './toast.model';
 
 const DEFAULT_DURATION: Record<ToastType, number> = {
   success: 3600,
-  info: 3600,
   warning: 3800,
   error: 4200
 };
@@ -30,10 +29,6 @@ export class ToastService {
 
   warning(message: string, duration = DEFAULT_DURATION.warning): void {
     this.push('warning', message, duration);
-  }
-
-  info(message: string, duration = DEFAULT_DURATION.info): void {
-    this.push('info', message, duration);
   }
 
   dismiss(id: number): void {

@@ -78,11 +78,11 @@ describe('AppComponent', () => {
 
   it('should notify through the shared ToastService when there are no new notifications', () => {
     const toastService = TestBed.inject(ToastService);
-    spyOn(toastService, 'info');
+    spyOn(toastService, 'warning');
 
     app.notifyNoNewNotifications();
 
-    expect(toastService.info).toHaveBeenCalledWith('No tienes nuevas notificaciones.');
+    expect(toastService.warning).toHaveBeenCalledWith('No tienes nuevas notificaciones.');
   });
 
   it('should translate the sidebar navigation live when the language setting changes (applies to the whole system)', () => {
@@ -103,15 +103,24 @@ describe('AppComponent', () => {
     expect(tabs[2].textContent).toContain('Settings');
   });
 
-  it('should toggle and persist dark mode', () => {
+  it('should toggle dark mode through SettingsService so it survives opening/closing Configuración', () => {
+    const settingsService = TestBed.inject(SettingsService);
+
     expect(app.darkMode).toBeFalse();
     app.toggleDarkMode();
+    fixture.detectChanges();
     expect(app.darkMode).toBeTrue();
-    expect(localStorage.getItem('tdo_dark_mode')).toBe('true');
+    expect(settingsService.saved().theme).toBe('oscuro');
+
+    // Abrir y cerrar Configuración sin tocar Apariencia no debe deshacer el toggle.
+    settingsService.discardDraft();
+    fixture.detectChanges();
+    expect(app.darkMode).toBeTrue();
 
     app.toggleDarkMode();
+    fixture.detectChanges();
     expect(app.darkMode).toBeFalse();
-    expect(localStorage.getItem('tdo_dark_mode')).toBe('false');
+    expect(settingsService.saved().theme).toBe('claro');
   });
 });
 

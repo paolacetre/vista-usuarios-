@@ -17,11 +17,10 @@ describe('ToastService', () => {
     service.success('ok');
     service.error('falló');
     service.warning('cuidado');
-    service.info('dato');
 
     const types = service.toasts().map((toast) => toast.type);
-    expect(types).toEqual(['success', 'error', 'warning', 'info']);
-    expect(service.toasts().map((toast) => toast.message)).toEqual(['ok', 'falló', 'cuidado', 'dato']);
+    expect(types).toEqual(['success', 'error', 'warning']);
+    expect(service.toasts().map((toast) => toast.message)).toEqual(['ok', 'falló', 'cuidado']);
   });
 
   it('should stack several toasts instead of replacing the previous one', () => {

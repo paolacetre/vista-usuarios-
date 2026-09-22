@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { SettingsService } from '../../settings.service';
 import { DATE_FORMAT_OPTIONS, TIMEZONE_OPTIONS } from '../../settings.model';
@@ -28,7 +29,7 @@ export class PreferencesTabComponent {
 
   constructor() {
     effect(() => this.form.patchValue(this.settings.draft(), { emitEvent: false }));
-    this.form.valueChanges.subscribe((value) => this.settings.updateDraft(value));
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => this.settings.updateDraft(value));
   }
 
   toggleNotifications(): void {

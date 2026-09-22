@@ -11,6 +11,6 @@
 }
 
 .date-format-btn:has(input:focus-visible) {
-  outline: 3px solid #b9e59f;
+  outline: 3px solid var(--accent-color);
   outline-offset: 2px;
 }

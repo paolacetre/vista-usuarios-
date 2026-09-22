@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ToastMessage } from './toast.model';
+import { TranslatePipe } from '../i18n/translate.pipe';
 
 /** Duración de la animación de salida (fade-out), debe calzar con el SCSS. */
 const EXIT_ANIMATION_MS = 220;
@@ -8,7 +9,7 @@ const EXIT_ANIMATION_MS = 220;
 @Component({
   selector: 'app-toast-item',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './toast-item.component.html',
   styleUrl: './toast-item.component.scss'
 })

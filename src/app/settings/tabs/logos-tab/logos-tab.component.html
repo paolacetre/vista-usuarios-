@@ -1,6 +1,6 @@
 <section class="config-card" aria-labelledby="section-logos-title">
   <div class="card-title-row">
-    <div class="card-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+    <div class="card-icon" [style.background-color]="'var(--primary-color-light)'" [style.color]="'var(--primary-color)'" aria-hidden="true">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
     </div>
     <div>
@@ -11,7 +11,7 @@
 
   <div class="apply-all-card">
     <div class="apply-all-info">
-      <div class="apply-all-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+      <div class="apply-all-icon" [style.background-color]="'var(--primary-color-light)'" [style.color]="'var(--primary-color)'" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
       </div>
       <div>
@@ -73,23 +73,24 @@
       <button *ngIf="draft().logos.login" type="button" class="remove-logo-btn" (click)="removeLogo('login')">{{ 'logos.remove' | translate }}</button>
     </div>
   </section>
-</div>
 
-<section class="config-card favicon-card" aria-labelledby="logo-favicon-title">
-  <div class="favicon-preview" [class.has-logo]="draft().logos.favicon">
-    <img *ngIf="draft().logos.favicon" [src]="draft().logos.favicon" [alt]="'logos.faviconTitle' | translate">
-    <span *ngIf="!draft().logos.favicon" class="logo-drop-empty">{{ 'logos.emptyFavicon' | translate }}</span>
-  </div>
-  <div class="favicon-info">
-    <h3 id="logo-favicon-title">{{ 'logos.faviconTitle' | translate }}</h3>
+  <section class="config-card logo-slot-card" aria-labelledby="logo-favicon-title">
+    <div class="logo-slot-head">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3"/></svg>
+      <h3 id="logo-favicon-title">{{ 'logos.faviconTitle' | translate }}</h3>
+    </div>
     <p class="card-description">{{ 'logos.faviconDesc' | translate }}</p>
-  </div>
-  <div class="logo-slot-actions favicon-actions">
-    <label class="upload-btn" tabindex="0">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-      <span>{{ 'logos.upload' | translate }}</span>
-      <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'favicon')">
-    </label>
-    <button *ngIf="draft().logos.favicon" type="button" class="remove-logo-btn" (click)="removeLogo('favicon')">{{ 'logos.remove' | translate }}</button>
-  </div>
-</section>
+    <div class="logo-drop" [class.has-logo]="draft().logos.favicon">
+      <img *ngIf="draft().logos.favicon" [src]="draft().logos.favicon" [alt]="'logos.faviconTitle' | translate">
+      <span *ngIf="!draft().logos.favicon" class="logo-drop-empty">{{ 'logos.emptyFavicon' | translate }}</span>
+    </div>
+    <div class="logo-slot-actions">
+      <label class="upload-btn full-width" tabindex="0">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span>{{ 'logos.upload' | translate }}</span>
+        <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'favicon')">
+      </label>
+      <button *ngIf="draft().logos.favicon" type="button" class="remove-logo-btn" (click)="removeLogo('favicon')">{{ 'logos.remove' | translate }}</button>
+    </div>
+  </section>
+</div>

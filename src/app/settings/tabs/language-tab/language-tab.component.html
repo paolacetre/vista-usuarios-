@@ -1,6 +1,6 @@
 <section class="config-card" aria-labelledby="section-language-title">
   <div class="card-title-row">
-    <div class="card-icon" [style.background-color]="draft().primaryColor + '18'" [style.color]="draft().primaryColor" aria-hidden="true">
+    <div class="card-icon" [style.background-color]="'var(--primary-color-light)'" [style.color]="'var(--primary-color)'" aria-hidden="true">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></svg>
     </div>
     <div>
@@ -18,7 +18,7 @@
       [class.selected]="form.controls.language.value === lang.id"
       [attr.aria-checked]="form.controls.language.value === lang.id"
       (click)="selectLanguage(lang.id)">
-      <span class="language-flag">{{ lang.flag }}</span>
+      <span class="language-flag" [ngClass]="'flag-' + lang.id" aria-hidden="true"></span>
       <strong>{{ lang.name }}</strong>
       <span class="language-native">{{ lang.native }}</span>
       <span class="language-check" *ngIf="form.controls.language.value === lang.id" aria-hidden="true">

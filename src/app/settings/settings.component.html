@@ -1,29 +1,73 @@
 <section class="settings-wrapper">
   <header class="settings-header">
-    <p class="eyebrow">{{ 'settings.eyebrow' | translate }}</p>
     <h1>{{ 'settings.title' | translate }}</h1>
-    <p class="subtitle">{{ 'settings.subtitle' | translate }}</p>
+    <p class="settings-tagline">{{ 'settings.tagline' | translate }}</p>
+    <p class="settings-disclaimer">{{ 'settings.subtitle' | translate }}</p>
   </header>
 
-  <nav class="settings-tabs" [attr.aria-label]="'settings.tabsAriaLabel' | translate">
-    <button
-      *ngFor="let tab of tabs"
-      type="button"
-      [class.active]="activeTab() === tab.id"
-      [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
-      (click)="selectTab(tab.id)">
-      <span class="tab-icon" aria-hidden="true">{{ tab.icon }}</span>
-      {{ tab.labelKey | translate }}
-    </button>
-  </nav>
+  <div class="settings-layout">
+    <!-- Área izquierda: pestañas + contenido de la pestaña activa, juntos
+         en la misma columna (a diferencia de antes, donde las pestañas
+         eran una franja aparte sobre las 2 columnas). -->
+    <div class="settings-left">
+      <nav class="settings-tabs" [attr.aria-label]="'settings.tabsAriaLabel' | translate">
+        <button
+          *ngFor="let tab of tabs"
+          type="button"
+          [class.active]="activeTab() === tab.id"
+          [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
+          (click)="selectTab(tab.id)">
+          <span class="tab-icon" aria-hidden="true">{{ tab.icon }}</span>
+          {{ tab.labelKey | translate }}
+        </button>
+      </nav>
 
-  <div class="settings-body">
-    <app-appearance-tab *ngIf="activeTab() === 'apariencia'"></app-appearance-tab>
-    <app-logos-tab *ngIf="activeTab() === 'logos'"></app-logos-tab>
-    <app-language-tab *ngIf="activeTab() === 'idioma'"></app-language-tab>
-    <app-accessibility-tab *ngIf="activeTab() === 'accesibilidad'"></app-accessibility-tab>
-    <app-preferences-tab *ngIf="activeTab() === 'preferencias'"></app-preferences-tab>
-    <app-about-tab *ngIf="activeTab() === 'acerca'"></app-about-tab>
+      <div class="settings-body">
+        <app-appearance-tab *ngIf="activeTab() === 'apariencia'"></app-appearance-tab>
+        <app-logos-tab *ngIf="activeTab() === 'logos'"></app-logos-tab>
+        <app-language-tab *ngIf="activeTab() === 'idioma'"></app-language-tab>
+        <app-accessibility-tab *ngIf="activeTab() === 'accesibilidad'"></app-accessibility-tab>
+        <app-preferences-tab *ngIf="activeTab() === 'preferencias'"></app-preferences-tab>
+        <app-about-tab *ngIf="activeTab() === 'acerca'"></app-about-tab>
+      </div>
+    </div>
+
+    <!-- Preview en vivo: fijo, el mismo en las 6 pestañas -->
+    <aside class="preview-column" [attr.aria-label]="'appearance.previewColumnAria' | translate">
+      <section class="preview-sticky-card" [attr.aria-label]="'appearance.previewCardAria' | translate">
+        <p class="preview-eyebrow">{{ 'appearance.previewEyebrow' | translate }}</p>
+        <h3>{{ 'appearance.previewTitle' | translate }}</h3>
+        <p class="preview-note">{{ 'appearance.previewNote' | translate }}</p>
+
+        <div class="mini-stats">
+          <div class="mini-card"><span class="lab">{{ 'appearance.statsLabel' | translate }}</span><span class="val">12.4K</span></div>
+          <div class="mini-card"><span class="lab">{{ 'appearance.growthLabel' | translate }}</span><span class="val up">+8.7%</span></div>
+        </div>
+
+        <div class="mini-chart">
+          <span class="lab">{{ 'appearance.chartLabel' | translate }}</span>
+          <div class="bars">
+            <i *ngFor="let height of previewBars; let i = index" [style.height.%]="height" [style.background-color]="i % 3 === 2 ? draft().accentColor : 'var(--primary-color)'" [style.opacity]="i === 1 ? 0.45 : 0.85"></i>
+          </div>
+        </div>
+
+        <div class="mini-table">
+          <span class="lab">{{ 'appearance.tableLabel' | translate }}</span>
+          <ng-container *ngFor="let width of previewTableRows; let i = index">
+            <div class="mtable-bar" [style.width.%]="width" [style.background-color]="i === 0 ? 'var(--primary-color)' : i === 1 ? draft().accentColor : '#8F8F8F'"></div>
+            <div class="mtable-track" [style.width.%]="width"></div>
+          </ng-container>
+        </div>
+      </section>
+
+      <div class="summary-card">
+        <div class="summary-heading">{{ 'appearance.summaryTitle' | translate }}</div>
+        <div class="summary-row"><span>{{ 'appearance.summaryTheme' | translate }}</span><b>{{ themeLabelKey(draft().theme) | translate }}</b></div>
+        <div class="summary-row"><span>{{ 'appearance.summaryFont' | translate }}</span><b>{{ sizeLabelKey(draft().fontSize) | translate }}</b></div>
+        <div class="summary-row"><span>{{ 'appearance.summaryDensity' | translate }}</span><b>{{ densityLabelKey(draft().density) | translate }}</b></div>
+        <div class="summary-row"><span>{{ 'appearance.summaryLanguage' | translate }}</span><b>{{ languageFlag() }}</b></div>
+      </div>
+    </aside>
   </div>
 
   <footer class="settings-footer">

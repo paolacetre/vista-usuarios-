@@ -65,6 +65,47 @@ describe('UsuariosComponent', () => {
     expect(created?.password).toBe('MiPassword*2026');
   }));
 
+  it('should reject a weak password (missing uppercase, lowercase, number or under 8 chars) when creating a user', fakeAsync(() => {
+    comp.startCreate();
+    comp.formUser = {
+      name: 'Usuario Débil',
+      email: 'debil@tdo.gov.co',
+      password: 'abc12345', // sin mayúscula
+      role: 'Analista'
+    };
+
+    comp.saveUser();
+    tick(250);
+
+    expect(comp.formError).toContain('mínimo 8 caracteres');
+    expect(comp.users.find(u => u.email === 'debil@tdo.gov.co')).toBeFalsy();
+
+    comp.formUser.password = 'Abcdefg1'; // cumple: mayúscula, minúscula, número, 8+ caracteres
+    comp.saveUser();
+    tick(250);
+
+    expect(comp.users.find(u => u.email === 'debil@tdo.gov.co')).toBeTruthy();
+  }));
+
+  it('should keep the current password when editing with the field left blank, but validate it if one is typed', fakeAsync(() => {
+    const existing = comp.users[0];
+    const originalPassword = existing.password;
+
+    comp.startEdit(existing);
+    comp.formUser.password = 'short1A'; // 7 caracteres: no cumple el mínimo de 8
+    comp.saveUser();
+    tick(250);
+
+    expect(comp.formError).toBeTruthy();
+    expect(existing.password).toBe(originalPassword);
+
+    comp.formUser.password = '';
+    comp.saveUser();
+    tick(250);
+
+    expect(existing.password).toBe(originalPassword);
+  }));
+
   it('should notify success/error through the shared ToastService instead of an @Output', () => {
     spyOn(toastService, 'success');
     spyOn(toastService, 'error');
