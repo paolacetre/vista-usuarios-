@@ -6,6 +6,8 @@
     aria-modal="true"
     aria-labelledby="states-modal-title"
     tabindex="-1"
+    appDialog
+    (dialogEscape)="close()"
     (click)="$event.stopPropagation()">
     <button type="button" class="states-modal-close" [attr.aria-label]="'appearance.statesModalCloseAria' | translate" (click)="close()">
       <span aria-hidden="true">&times;</span>

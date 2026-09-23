@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS, SIZE_PRESETS, SystemConfig, SystemLogos, cloneSetting
 import { ThemeService } from './theme.service';
 
 const STORAGE_KEY = 'tdo_system_config';
+const LEGACY_DEFAULT_PRINCIPAL_LOGO = '/assets/logos/logo-principal.png';
 
 /**
  * Estado de los ajustes globales de la plataforma (uno solo, compartido por
@@ -49,7 +50,11 @@ export class SettingsService {
   /** Simula `PATCH /api/settings`. Solo admin puede llegar a este flujo (vista protegida). */
   save(): Observable<SystemConfig> {
     const toSave = cloneSettings(this.draftSignal());
-    this.writeToStorage(toSave);
+    if (!this.writeToStorage(toSave)) {
+      // No cabe en el almacenamiento (p. ej. logos muy pesados): no se marca
+      // como guardado, el borrador sigue pendiente y quien llama muestra el error.
+      return throwError(() => new Error('STORAGE_FULL'));
+    }
     this.savedSignal.set(toSave);
     this.theme.apply(toSave);
     return new Observable<SystemConfig>((subscriber) => {
@@ -58,11 +63,14 @@ export class SettingsService {
     });
   }
 
-  /** Restablecer: el borrador vuelve a los valores de fábrica (NO a `saved`) y se aplica en vivo. */
-  reset(): void {
-    const defaults = cloneSettings(DEFAULT_SETTINGS);
-    this.draftSignal.set(defaults);
-    this.theme.apply(defaults);
+  /**
+   * Restablecer: vuelve a los valores de fábrica y los GUARDA de inmediato
+   * (misma persistencia que `save()`), descartando cualquier cambio pendiente.
+   * No hace falta pulsar "Guardar cambios" después.
+   */
+  reset(): Observable<SystemConfig> {
+    this.draftSignal.set(cloneSettings(DEFAULT_SETTINGS));
+    return this.save();
   }
 
   /** Descarta el borrador sin guardar y reaplica lo guardado (al cerrar el panel sin "Guardar"). */
@@ -148,6 +156,11 @@ export class SettingsService {
       // `fontFamily` y `borderRadius` ya no son ajustes (Work Sans / Suave fijos):
       // se descartan si vienen de una versión anterior guardada.
       const { fontFamily: _font, borderRadius: _radius, ...parsed } = JSON.parse(raw);
+      // El logo principal por defecto pasó de logo-principal.png (con texto)
+      // a logo-simbolo.png; un logo subido por el usuario (data URL) se respeta.
+      if (parsed.logos?.principal === LEGACY_DEFAULT_PRINCIPAL_LOGO) {
+        parsed.logos.principal = DEFAULT_SETTINGS.logos.principal;
+      }
       return {
         ...cloneSettings(DEFAULT_SETTINGS),
         ...parsed,
@@ -161,11 +174,15 @@ export class SettingsService {
     }
   }
 
-  private writeToStorage(config: SystemConfig): void {
+  /** `false` solo si el almacenamiento está lleno: ahí sí se perdería lo guardado al recargar. */
+  private writeToStorage(config: SystemConfig): boolean {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-    } catch {
-      // Storage puede no estar disponible en entornos con almacenamiento restringido.
+      return true;
+    } catch (error) {
+      // Storage puede no estar disponible en entornos con almacenamiento
+      // restringido: en ese caso se sigue guardando solo en memoria, como antes.
+      return !(error instanceof DOMException && error.name === 'QuotaExceededError');
     }
   }
 }

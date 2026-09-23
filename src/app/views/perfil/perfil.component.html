@@ -31,7 +31,7 @@
         </div>
 
         <div class="avatar-controls">
-          <label class="btn-upload" [attr.tabindex]="readOnly() ? -1 : 0" [style.pointer-events]="readOnly() ? 'none' : null" [style.opacity]="readOnly() ? 0.5 : null">
+          <label class="btn-upload" [style.pointer-events]="readOnly() ? 'none' : null" [style.opacity]="readOnly() ? 0.5 : null">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <span>{{ 'perfil.uploadPhoto' | translate }}</span>
             <input type="file" accept="image/png, image/jpeg, image/webp" class="sr-only" [disabled]="readOnly()" (change)="onPhotoSelected($event)">
@@ -44,7 +44,7 @@
       </div>
 
       <div class="identity-info">
-        <h3>{{ formProfile.name }}</h3>
+        <h2>{{ formProfile.name }}</h2>
         <p class="identity-email">{{ formProfile.email }}</p>
 
         <div class="pill-group">
@@ -66,7 +66,7 @@
     </aside>
 
     <!-- Right Column: Personal Information Form -->
-    <main class="form-card" [attr.aria-label]="'perfil.formAriaLabel' | translate">
+    <section class="form-card" [attr.aria-label]="'perfil.formAriaLabel' | translate">
       <div class="card-header">
         <div class="card-header-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -112,8 +112,8 @@
 
           <!-- Rol en Plataforma (Bloqueado) -->
           <div class="field-group">
-            <label>{{ 'perfil.fieldRole' | translate }}</label>
-            <div class="locked-box" [title]="'perfil.roleLockedTitle' | translate">
+            <label id="profile-role-label">{{ 'perfil.fieldRole' | translate }}</label>
+            <div class="locked-box" role="group" aria-labelledby="profile-role-label" [title]="'perfil.roleLockedTitle' | translate">
               <div class="locked-box-content">
                 <span class="locked-dot"></span>
                 <strong>{{ formProfile.role }}</strong>
@@ -137,6 +137,6 @@
           </button>
         </footer>
       </form>
-    </main>
+    </section>
   </div>
 </section>

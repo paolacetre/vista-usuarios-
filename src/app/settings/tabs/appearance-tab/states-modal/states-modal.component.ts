@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
+import { DialogDirective } from '../../../../shared/dialog/dialog.directive';
 
 interface StateCardItem {
   key: 'approved' | 'rejected' | 'warning';
@@ -18,7 +19,7 @@ interface StateCardItem {
 @Component({
   selector: 'app-states-modal',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, DialogDirective],
   templateUrl: './states-modal.component.html',
   styleUrl: './states-modal.component.scss'
 })

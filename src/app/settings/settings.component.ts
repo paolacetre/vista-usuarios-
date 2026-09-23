@@ -11,6 +11,7 @@ import { LanguageTabComponent } from './tabs/language-tab/language-tab.component
 import { AccessibilityTabComponent } from './tabs/accessibility-tab/accessibility-tab.component';
 import { PreferencesTabComponent } from './tabs/preferences-tab/preferences-tab.component';
 import { AboutTabComponent } from './tabs/about-tab/about-tab.component';
+import { DialogDirective } from '../shared/dialog/dialog.directive';
 
 export type SettingsTabId = 'apariencia' | 'logos' | 'idioma' | 'accesibilidad' | 'preferencias' | 'acerca';
 
@@ -40,7 +41,8 @@ interface SettingsTabDef {
     LanguageTabComponent,
     AccessibilityTabComponent,
     PreferencesTabComponent,
-    AboutTabComponent
+    AboutTabComponent,
+    DialogDirective
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
@@ -83,6 +85,26 @@ export class SettingsComponent {
     this.activeTab.set(tab);
   }
 
+  /** Patrón de pestañas: flechas izquierda/derecha, Inicio y Fin cambian de pestaña y mueven el foco. */
+  onTabsKeydown(event: KeyboardEvent): void {
+    const current = this.tabs.findIndex((tab) => tab.id === this.activeTab());
+    const last = this.tabs.length - 1;
+    const next =
+      event.key === 'ArrowRight' ? (current === last ? 0 : current + 1) :
+      event.key === 'ArrowLeft' ? (current === 0 ? last : current - 1) :
+      event.key === 'Home' ? 0 :
+      event.key === 'End' ? last :
+      -1;
+    if (next < 0) {
+      return;
+    }
+
+    event.preventDefault();
+    const tab = this.tabs[next];
+    this.selectTab(tab.id);
+    setTimeout(() => document.getElementById(`settings-tab-${tab.id}`)?.focus());
+  }
+
   requestSave(): void {
     if (!this.isDirty()) {
       return;
@@ -112,8 +134,8 @@ export class SettingsComponent {
 
   requestReset(): void {
     // A diferencia de "Guardar cambios", Restablecer siempre está habilitado:
-    // vuelve el borrador a los valores de fábrica (no a lo guardado), sin
-    // importar si ya había cambios pendientes.
+    // al confirmar, restaura los valores de fábrica y los guarda de inmediato,
+    // sin importar si ya había cambios pendientes (se descartan).
     this.pendingReset.set(true);
   }
 
@@ -122,8 +144,15 @@ export class SettingsComponent {
   }
 
   confirmReset(): void {
-    this.settingsService.reset();
-    this.pendingReset.set(false);
-    this.toastService.success(this.translationService.translate('settings.toastReset'));
+    this.settingsService.reset().subscribe({
+      next: () => {
+        this.pendingReset.set(false);
+        this.toastService.success(this.translationService.translate('settings.toastReset'));
+      },
+      error: () => {
+        this.pendingReset.set(false);
+        this.toastService.error(this.translationService.translate('settings.toastSaveError'));
+      }
+    });
   }
 }

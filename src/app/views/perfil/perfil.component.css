@@ -173,6 +173,12 @@
   transform: translateY(-1px);
 }
 
+/* El foco real lo tiene el input de archivo (oculto con .sr-only): se refleja en la etiqueta. */
+.btn-upload:has(input:focus-visible) {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
 .btn-upload svg {
   width: 14px;
   height: 14px;
@@ -209,7 +215,7 @@
   border-bottom: 1px solid #D4D4D4;
 }
 
-.identity-info h3 {
+.identity-info h2 {
   font-size: var(--fs-subtitle);
   color: #001631;
   margin: 0 0 4px;
@@ -548,7 +554,7 @@
 
 /* Dark Mode */
 :host-context(.shell.dark-mode) .page-heading h1,
-:host-context(.shell.dark-mode) .identity-info h3,
+:host-context(.shell.dark-mode) .identity-info h2,
 :host-context(.shell.dark-mode) .card-header h2,
 :host-context(.shell.dark-mode) .meta-value,
 :host-context(.shell.dark-mode) .locked-box-content strong {

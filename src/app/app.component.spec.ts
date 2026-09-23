@@ -1,6 +1,7 @@
 /// <reference types="jasmine" />
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { UsuariosComponent } from './views/usuarios/usuarios.component';
 import { PerfilComponent } from './views/perfil/perfil.component';
@@ -83,6 +84,77 @@ describe('AppComponent', () => {
     app.notifyNoNewNotifications();
 
     expect(toastService.warning).toHaveBeenCalledWith('No tienes nuevas notificaciones.');
+  });
+
+  it('should keep users created or deleted in Usuarios after navigating to Perfil and back', fakeAsync(() => {
+    let usuarios = fixture.debugElement.query(By.directive(UsuariosComponent)).componentInstance as UsuariosComponent;
+    usuarios.startCreate();
+    usuarios.formUser = { name: 'Nueva Persona', email: 'nueva@tdo.gov.co', password: 'Segura123', role: 'Analista' };
+    usuarios.saveUser();
+    tick(250);
+    usuarios.requestDelete(usuarios.users.find((u) => u.id === 2)!, { currentTarget: null });
+    usuarios.confirmDelete();
+    tick(250);
+    fixture.detectChanges();
+    flush();
+
+    app.switchView('perfil');
+    fixture.detectChanges();
+    app.switchView('usuarios');
+    fixture.detectChanges();
+
+    usuarios = fixture.debugElement.query(By.directive(UsuariosComponent)).componentInstance as UsuariosComponent;
+    expect(usuarios.users.some((u) => u.email === 'nueva@tdo.gov.co')).toBeTrue();
+    expect(usuarios.users.some((u) => u.id === 2)).toBeFalse();
+    flush();
+  }));
+
+  it('should close only the nested dialog on Escape inside Configuración, keeping the panel and unsaved changes', fakeAsync(() => {
+    const settingsService = TestBed.inject(SettingsService);
+    app.switchView('configuracion');
+    fixture.detectChanges();
+    settingsService.updateDraft({ accentColor: '#123456' });
+    const settings = fixture.debugElement.query(By.directive(SettingsComponent)).componentInstance as SettingsComponent;
+    settings.requestSave();
+    fixture.detectChanges();
+    flush();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const saveDialog = compiled.querySelector('[aria-labelledby="save-dialog-title"]') as HTMLElement;
+    saveDialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    flush();
+
+    expect(settings.pendingSave()).toBeFalse();
+    expect(app.configurationOpen).toBeTrue();
+    expect(settingsService.draft().accentColor).toBe('#123456');
+
+    const panel = compiled.querySelector('.configuration-modal') as HTMLElement;
+    panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    flush();
+
+    expect(app.configurationOpen).toBeFalse();
+  }));
+
+  it('should show the principal logo together with the app name in the sidebar, and the "T" mark when there is no logo', () => {
+    const settingsService = TestBed.inject(SettingsService);
+    const compiled = fixture.nativeElement as HTMLElement;
+    const logos = settingsService.draft().logos;
+
+    settingsService.updateDraft({ logos: { ...logos, principal: '/assets/logos/logo-simbolo.png' } });
+    fixture.detectChanges();
+    const img = compiled.querySelector('.brand .brand-logo') as HTMLImageElement;
+    expect(img).not.toBeNull();
+    expect(img.getAttribute('src')).toBe('/assets/logos/logo-simbolo.png');
+    expect(compiled.querySelector('.brand .brand-name')?.textContent).toContain('Tendencias Ocupacionales');
+    expect(compiled.querySelector('.brand .brand-mark')).toBeNull();
+
+    settingsService.updateDraft({ logos: { ...logos, principal: null } });
+    fixture.detectChanges();
+    expect(compiled.querySelector('.brand .brand-logo')).toBeNull();
+    expect(compiled.querySelector('.brand .brand-mark')).not.toBeNull();
+    expect(compiled.querySelector('.brand')?.textContent).toContain('Tendencias Ocupacionales');
   });
 
   it('should translate the sidebar navigation live when the language setting changes (applies to the whole system)', () => {

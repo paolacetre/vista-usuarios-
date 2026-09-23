@@ -41,9 +41,7 @@ export class ThemeService {
       root.style.setProperty('--app-font-family', APP_FONT_FAMILY);
       root.style.setProperty('--border-radius', `${SOFT_BORDER_RADIUS}px`);
       // Escala de texto: 1 = párrafo 16px, títulos 26px, subtítulos 20px (styles.css).
-      root.style.setProperty('--app-font-size', `${config.fontSize}px`);
       root.style.setProperty('--type-scale', String(config.fontSize / 16));
-      root.style.setProperty('--density-space', config.density === 'compacta' ? '0.75' : config.density === 'amplia' ? '1.25' : '1');
       root.setAttribute('data-density', config.density);
       // Accesibilidad: banderas que styles.css y los componentes leen para reaccionar.
       root.setAttribute('data-high-contrast', String(config.highContrast));

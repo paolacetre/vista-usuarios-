@@ -16,10 +16,60 @@ describe('SettingsService', () => {
   });
 
   it('should preload the real brand logo assets as factory defaults instead of empty slots', () => {
-    expect(DEFAULT_SETTINGS.logos.principal).toBe('/assets/logos/logo-principal.png');
+    expect(DEFAULT_SETTINGS.logos.principal).toBe('/assets/logos/logo-simbolo.png');
     expect(DEFAULT_SETTINGS.logos.login).toBe('/assets/logos/logo-login.png');
     expect(DEFAULT_SETTINGS.logos.favicon).toBe('/assets/logos/favicon.png');
-    expect(service.draft().logos.principal).toBe('/assets/logos/logo-principal.png');
+    expect(service.draft().logos.principal).toBe('/assets/logos/logo-simbolo.png');
+  });
+
+  it('should migrate a saved config still pointing to the old text logo to the symbol-only principal logo', () => {
+    localStorage.setItem('tdo_system_config', JSON.stringify({
+      ...DEFAULT_SETTINGS,
+      logos: { ...DEFAULT_SETTINGS.logos, principal: '/assets/logos/logo-principal.png' }
+    }));
+
+    service.load().subscribe();
+
+    expect(service.draft().logos.principal).toBe('/assets/logos/logo-simbolo.png');
+    localStorage.removeItem('tdo_system_config');
+  });
+
+  it('should persist the factory defaults on reset, so they are still there after reloading', () => {
+    service.updateDraft({ accentColor: '#123456', language: 'en' });
+    service.save().subscribe();
+
+    service.reset().subscribe();
+
+    // "Recargar": un servicio nuevo que solo lee lo persistido.
+    TestBed.resetTestingModule();
+    const reloaded = TestBed.inject(SettingsService);
+    reloaded.load().subscribe();
+    expect(reloaded.saved()).toEqual(DEFAULT_SETTINGS);
+    expect(reloaded.draft()).toEqual(DEFAULT_SETTINGS);
+    localStorage.removeItem('tdo_system_config');
+  });
+
+  it('should report an error (and keep the draft pending) when the storage quota is exceeded on save', () => {
+    service.updateDraft({ accentColor: '#123456' });
+    spyOn(localStorage, 'setItem').and.throwError(new DOMException('full', 'QuotaExceededError'));
+
+    let failed = false;
+    service.save().subscribe({ error: () => (failed = true) });
+
+    expect(failed).toBeTrue();
+    expect(service.isDirty()).toBeTrue();
+    expect(service.saved().accentColor).not.toBe('#123456');
+  });
+
+  it('should still save in memory when storage is simply unavailable (not full)', () => {
+    service.updateDraft({ accentColor: '#654321' });
+    spyOn(localStorage, 'setItem').and.throwError(new DOMException('denied', 'SecurityError'));
+
+    let failed = false;
+    service.save().subscribe({ error: () => (failed = true) });
+
+    expect(failed).toBeFalse();
+    expect(service.saved().accentColor).toBe('#654321');
   });
 
   it('should reject an uploaded SVG containing an embedded <script> tag', (done) => {

@@ -68,8 +68,10 @@ export const DEFAULT_SETTINGS: SystemConfig = {
   // adicional agregado en angular.json). Hoy están en PNG porque son los
   // archivos disponibles; si se agregan versiones .svg más adelante, basta
   // con cambiar estas 3 rutas.
+  // El principal es solo el símbolo (sin "Observatorio Laboral y
+  // Ocupacional"): en el menú lateral va al lado del nombre de la plataforma.
   logos: {
-    principal: '/assets/logos/logo-principal.png',
+    principal: '/assets/logos/logo-simbolo.png',
     login: '/assets/logos/logo-login.png',
     favicon: '/assets/logos/favicon.png'
   }

@@ -33,6 +33,21 @@ export class LanguageTabComponent {
     this.form.controls.language.setValue(language);
   }
 
+  /** Patrón de radiogroup: las flechas cambian la opción seleccionada y mueven el foco. */
+  onLanguageKeydown(event: KeyboardEvent): void {
+    const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0;
+    if (!step) {
+      return;
+    }
+
+    event.preventDefault();
+    const options = this.languageOptions;
+    const current = options.findIndex((lang) => lang.id === this.form.controls.language.value);
+    const next = options[(current + step + options.length) % options.length];
+    this.selectLanguage(next.id);
+    setTimeout(() => document.getElementById(`language-option-${next.id}`)?.focus());
+  }
+
   selectedLanguageName(): string {
     return this.languageOptions.find((lang) => lang.id === this.form.controls.language.value)?.name ?? '';
   }

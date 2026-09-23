@@ -336,7 +336,9 @@
   flex-shrink: 0;
 }
 
-.upload-btn:focus-visible {
+/* El foco real lo tiene el input de archivo (oculto con .sr-only): se refleja en la etiqueta. */
+.upload-btn:focus-visible,
+.upload-btn:has(input:focus-visible) {
   outline: 3px solid var(--accent-color);
   outline-offset: 2px;
 }

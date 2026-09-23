@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit, computed, effect, inject } from '@angular/core';
-import { UsuariosComponent, User } from './views/usuarios/usuarios.component';
-import { PerfilComponent, ProfileData } from './views/perfil/perfil.component';
+import { Component, OnInit, computed, effect, inject } from '@angular/core';
+import { UsuariosComponent, User, createInitialUsers } from './views/usuarios/usuarios.component';
+import { PerfilComponent, ProfileData, createInitialProfile } from './views/perfil/perfil.component';
 import { SettingsComponent } from './settings/settings.component';
 import { SettingsService } from './settings/settings.service';
 import { ToastContainerComponent } from './shared/toast/toast-container.component';
@@ -9,11 +9,12 @@ import { ToastService } from './shared/toast/toast.service';
 import { TranslatePipe } from './shared/i18n/translate.pipe';
 import { TranslationService } from './shared/i18n/translation.service';
 import { initialsFrom } from './shared/format/initials';
+import { DialogDirective } from './shared/dialog/dialog.directive';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, UsuariosComponent, PerfilComponent, SettingsComponent, ToastContainerComponent, TranslatePipe],
+  imports: [CommonModule, UsuariosComponent, PerfilComponent, SettingsComponent, ToastContainerComponent, TranslatePipe, DialogDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -25,23 +26,21 @@ export class AppComponent implements OnInit {
   readonly sessionRole = 'Administrador';
   /** Preferencias > "Notificaciones del sistema": muestra u oculta la campana de la barra superior. */
   readonly notificationsEnabled = computed(() => this.settingsService.draft().notifications);
+  /**
+   * Aún no hay fuente de notificaciones (no hay backend): 0 oculta el contador
+   * de la campana. Antes mostraba un "22" fijo que contradecía el aviso
+   * "No tienes nuevas notificaciones".
+   */
+  readonly unreadNotifications = 0;
+  /** Configuración > Logos > "Logo principal": se muestra en el menú lateral, en vivo al cambiarlo. */
+  readonly brandLogo = computed(() => this.settingsService.draft().logos.principal);
   currentView: 'usuarios' | 'perfil' | 'configuracion' = 'usuarios';
   configurationOpen = false;
   darkMode = false;
 
-  profileUser: ProfileData = {
-    name: 'SENA Admin',
-    email: 'admin@tdo.gov.co',
-    role: 'Administrador',
-    entity: 'Servicio Nacional de Aprendizaje (SENA)',
-    dateJoined: '24/08/2026',
-    photoUrl: ''
-  };
+  profileUser: ProfileData = createInitialProfile();
 
-  users: User[] = [
-    { id: 1, name: 'SENA Admin', email: 'admin@tdo.gov.co', password: 'Admin*Password2026', role: 'Admin', status: 'Activo', date: '24/08/2026', initials: 'SA' },
-    { id: 2, name: 'Analista TDO', email: 'analista@tdo.gov.co', password: 'Analista*Password2026', role: 'Analista', status: 'Activo', date: '24/08/2026', initials: 'AT' },
-  ];
+  users: User[] = createInitialUsers();
 
   constructor() {
     // Los ajustes de Configuración son globales y se aplican en vivo (incluso
@@ -69,14 +68,6 @@ export class AppComponent implements OnInit {
     this.currentView = 'usuarios';
   }
 
-  @HostListener('document:keydown.escape', ['$event'])
-  onConfigurationEscape(event: Event) {
-    if (this.configurationOpen) {
-      event.preventDefault();
-      this.closeConfiguration();
-    }
-  }
-
   /**
    * Antes esto solo tocaba un flag local + una clave de localStorage sin
    * relación con SettingsService, así que cualquier interacción con
@@ -89,7 +80,9 @@ export class AppComponent implements OnInit {
   toggleDarkMode() {
     const nextTheme = this.settingsService.draft().theme === 'oscuro' ? 'claro' : 'oscuro';
     this.settingsService.updateDraft({ theme: nextTheme });
-    this.settingsService.save().subscribe();
+    this.settingsService.save().subscribe({
+      error: () => this.toastService.error(this.translationService.translate('settings.toastSaveError'))
+    });
   }
 
   notifyNoNewNotifications() {

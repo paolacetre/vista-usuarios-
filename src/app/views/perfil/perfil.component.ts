@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, computed, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../shared/toast/toast.service';
@@ -16,22 +16,9 @@ export interface ProfileData {
   photoUrl: string;
 }
 
-@Component({
-  selector: 'app-perfil',
-  standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe],
-  templateUrl: './perfil.component.html',
-  styleUrl: './perfil.component.css'
-})
-export class PerfilComponent {
-  private readonly toastService = inject(ToastService);
-  private readonly translationService = inject(TranslationService);
-  private readonly settingsService = inject(SettingsService);
-
-  /** Accesibilidad > "Modo solo lectura": el perfil se puede ver pero no modificar. */
-  readonly readOnly = computed(() => this.settingsService.draft().readOnly);
-
-  @Input() profile: ProfileData = {
+/** Perfil de ejemplo de la sesión (no hay backend). */
+export function createInitialProfile(): ProfileData {
+  return {
     name: 'SENA Admin',
     email: 'admin@tdo.gov.co',
     role: 'Administrador',
@@ -39,6 +26,24 @@ export class PerfilComponent {
     dateJoined: '24/08/2026',
     photoUrl: ''
   };
+}
+
+@Component({
+  selector: 'app-perfil',
+  standalone: true,
+  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe],
+  templateUrl: './perfil.component.html',
+  styleUrl: './perfil.component.css'
+})
+export class PerfilComponent implements OnInit {
+  private readonly toastService = inject(ToastService);
+  private readonly translationService = inject(TranslationService);
+  private readonly settingsService = inject(SettingsService);
+
+  /** Accesibilidad > "Modo solo lectura": el perfil se puede ver pero no modificar. */
+  readonly readOnly = computed(() => this.settingsService.draft().readOnly);
+
+  @Input() profile: ProfileData = createInitialProfile();
 
   @Output() profileSaved = new EventEmitter<ProfileData>();
   @Output() cancel = new EventEmitter<void>();

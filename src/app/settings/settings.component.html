@@ -1,6 +1,6 @@
 <section class="settings-wrapper">
   <header class="settings-header">
-    <h1>{{ 'settings.title' | translate }}</h1>
+    <h1 id="settings-title">{{ 'settings.title' | translate }}</h1>
     <p class="settings-tagline">{{ 'settings.tagline' | translate }}</p>
     <p class="settings-disclaimer">{{ 'settings.subtitle' | translate }}</p>
   </header>
@@ -10,19 +10,23 @@
          en la misma columna (a diferencia de antes, donde las pestañas
          eran una franja aparte sobre las 2 columnas). -->
     <div class="settings-left">
-      <nav class="settings-tabs" [attr.aria-label]="'settings.tabsAriaLabel' | translate">
+      <div class="settings-tabs" role="tablist" [attr.aria-label]="'settings.tabsAriaLabel' | translate" (keydown)="onTabsKeydown($event)">
         <button
           *ngFor="let tab of tabs"
           type="button"
+          role="tab"
+          [id]="'settings-tab-' + tab.id"
+          aria-controls="settings-tabpanel"
           [class.active]="activeTab() === tab.id"
-          [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
+          [attr.aria-selected]="activeTab() === tab.id"
+          [attr.tabindex]="activeTab() === tab.id ? 0 : -1"
           (click)="selectTab(tab.id)">
           <span class="tab-icon" aria-hidden="true">{{ tab.icon }}</span>
           {{ tab.labelKey | translate }}
         </button>
-      </nav>
+      </div>
 
-      <div class="settings-body">
+      <div class="settings-body" role="tabpanel" id="settings-tabpanel" [attr.aria-labelledby]="'settings-tab-' + activeTab()">
         <app-appearance-tab *ngIf="activeTab() === 'apariencia'"></app-appearance-tab>
         <app-logos-tab *ngIf="activeTab() === 'logos'"></app-logos-tab>
         <app-language-tab *ngIf="activeTab() === 'idioma'"></app-language-tab>
@@ -61,7 +65,7 @@
       </section>
 
       <div class="summary-card">
-        <div class="summary-heading">{{ 'appearance.summaryTitle' | translate }}</div>
+        <div class="summary-heading" role="heading" aria-level="3">{{ 'appearance.summaryTitle' | translate }}</div>
         <div class="summary-row"><span>{{ 'appearance.summaryTheme' | translate }}</span><b>{{ themeLabelKey(draft().theme) | translate }}</b></div>
         <div class="summary-row"><span>{{ 'appearance.summaryFont' | translate }}</span><b>{{ sizeLabelKey(draft().fontSize) | translate }}</b></div>
         <div class="summary-row"><span>{{ 'appearance.summaryDensity' | translate }}</span><b>{{ densityLabelKey(draft().density) | translate }}</b></div>
@@ -89,7 +93,7 @@
 
   <!-- Confirmación de guardado: mismo patrón visual que "Eliminar"/"Cambio de estado" en Usuarios -->
   <div class="dialog-backdrop" *ngIf="pendingSave()" (click)="cancelSave()">
-    <section class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="save-dialog-title" aria-describedby="save-dialog-description" tabindex="-1" (click)="$event.stopPropagation()">
+    <section class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="save-dialog-title" aria-describedby="save-dialog-description" tabindex="-1" appDialog (dialogEscape)="isSavePending || cancelSave()" (click)="$event.stopPropagation()">
       <div class="alert-dialog-header">
         <div class="dialog-icon activate-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -97,7 +101,7 @@
         <div class="alert-dialog-titles">
           <h2 id="save-dialog-title">{{ 'settings.saveDialogTitle' | translate }}</h2>
           <p id="save-dialog-description">
-            {{ 'settings.saveDialogDesc' | translate:{ strongOpen: '', strongClose: '' } }}
+            {{ 'settings.saveDialogDesc' | translate }}
           </p>
         </div>
       </div>
@@ -112,7 +116,7 @@
 
   <!-- Confirmación de restablecer: mismo patrón, icono "reset" como en Usuarios -->
   <div class="dialog-backdrop" *ngIf="pendingReset()" (click)="cancelReset()">
-    <section class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title" aria-describedby="reset-dialog-description" tabindex="-1" (click)="$event.stopPropagation()">
+    <section class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title" aria-describedby="reset-dialog-description" tabindex="-1" appDialog (dialogEscape)="cancelReset()" (click)="$event.stopPropagation()">
       <div class="alert-dialog-header">
         <div class="dialog-icon reset-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 3 6.7M3 12v6h6"/></svg>

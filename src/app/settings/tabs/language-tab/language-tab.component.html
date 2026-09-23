@@ -9,14 +9,16 @@
     </div>
   </div>
 
-  <div class="language-grid" role="radiogroup" [attr.aria-label]="'language.ariaLabel' | translate">
+  <div class="language-grid" role="radiogroup" [attr.aria-label]="'language.ariaLabel' | translate" (keydown)="onLanguageKeydown($event)">
     <button
       *ngFor="let lang of languageOptions"
       type="button"
       class="language-card"
       role="radio"
+      [id]="'language-option-' + lang.id"
       [class.selected]="form.controls.language.value === lang.id"
       [attr.aria-checked]="form.controls.language.value === lang.id"
+      [attr.tabindex]="form.controls.language.value === lang.id ? 0 : -1"
       (click)="selectLanguage(lang.id)">
       <span class="language-flag" [ngClass]="'flag-' + lang.id" aria-hidden="true"></span>
       <strong>{{ lang.name }}</strong>

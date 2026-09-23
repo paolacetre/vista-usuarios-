@@ -19,7 +19,7 @@
         <p class="card-description">{{ 'logos.applyAllDesc' | translate }}</p>
       </div>
     </div>
-    <label class="upload-btn" tabindex="0">
+    <label class="upload-btn">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
       <span>{{ 'logos.applyAllButton' | translate }}</span>
       <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'all')">
@@ -45,7 +45,7 @@
       <span *ngIf="!draft().logos.principal" class="logo-drop-empty">{{ 'logos.empty' | translate }}</span>
     </div>
     <div class="logo-slot-actions">
-      <label class="upload-btn full-width" tabindex="0">
+      <label class="upload-btn full-width">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
         <span>{{ 'logos.upload' | translate }}</span>
         <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'principal')">
@@ -65,7 +65,7 @@
       <span *ngIf="!draft().logos.login" class="logo-drop-empty">{{ 'logos.empty' | translate }}</span>
     </div>
     <div class="logo-slot-actions">
-      <label class="upload-btn full-width" tabindex="0">
+      <label class="upload-btn full-width">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
         <span>{{ 'logos.upload' | translate }}</span>
         <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'login')">
@@ -85,7 +85,7 @@
       <span *ngIf="!draft().logos.favicon" class="logo-drop-empty">{{ 'logos.emptyFavicon' | translate }}</span>
     </div>
     <div class="logo-slot-actions">
-      <label class="upload-btn full-width" tabindex="0">
+      <label class="upload-btn full-width">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
         <span>{{ 'logos.upload' | translate }}</span>
         <input type="file" accept="image/svg+xml,image/png,image/jpeg" class="sr-only" (change)="onLogoSelected($event, 'favicon')">
