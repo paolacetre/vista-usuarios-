@@ -34,7 +34,6 @@
   /* Tipografía: Work Sans, 3 niveles. `--type-scale` lo fija ThemeService
      (opciones seleccionables Pequeño/Normal/Grande/Muy grande; Normal = 1). */
   --app-font-family: 'Work Sans', sans-serif;
-  --app-font-size: 16px;
   --type-scale: 1;
   --fs-title: calc(26px * var(--type-scale));
   --fs-subtitle: calc(20px * var(--type-scale));
@@ -44,7 +43,6 @@
 
   /* Radio único: "Suave" (16px, como los botones en Figma). */
   --border-radius: 16px;
-  --density-space: 1;
 }
 
 * {

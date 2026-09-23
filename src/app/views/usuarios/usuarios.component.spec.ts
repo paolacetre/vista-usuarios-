@@ -92,6 +92,8 @@ describe('UsuariosComponent', () => {
     const originalPassword = existing.password;
 
     comp.startEdit(existing);
+    // La contraseña actual nunca se precarga en el formulario de edición.
+    expect(comp.formUser.password).toBe('');
     comp.formUser.password = 'short1A'; // 7 caracteres: no cumple el mínimo de 8
     comp.saveUser();
     tick(250);

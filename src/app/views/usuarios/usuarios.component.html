@@ -79,11 +79,11 @@
     </aside>
   </div>
 
-  <section class="users-table" [attr.aria-label]="'usuarios.tableAriaLabel' | translate" [attr.aria-busy]="isLoading">
+  <section class="users-table" [attr.aria-label]="'usuarios.tableAriaLabel' | translate">
     <table>
       <caption class="sr-only">{{ 'usuarios.tableAriaLabel' | translate }}</caption>
       <thead class="table-head"><tr><th scope="col">{{ 'usuarios.colUser' | translate }}</th><th scope="col">{{ 'usuarios.colEmail' | translate }}</th><th scope="col">{{ 'usuarios.colRole' | translate }}</th><th scope="col">{{ 'usuarios.colStatus' | translate }}</th><th scope="col">{{ 'usuarios.colActions' | translate }}</th></tr></thead>
-      <tbody *ngIf="!isLoading && !loadError && filteredUsers.length">
+      <tbody *ngIf="filteredUsers.length">
         <tr class="user-row" *ngFor="let user of filteredUsers; trackBy: trackUserById">
           <td><div class="user-cell"><div class="avatar" aria-hidden="true">{{ user.initials }}</div><div><strong>{{ user.name }}</strong><small>{{ user.date | appDate }}</small></div></div></td>
           <td class="email">{{ user.email }}</td>
@@ -92,8 +92,6 @@
           <td><div class="row-actions"><button class="edit-btn" type="button" [title]="'usuarios.editTitle' | translate" [disabled]="readOnly() || isUserPending(user)" [attr.aria-label]="'usuarios.editAria' | translate:{ name: user.name }" (click)="startEdit(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg></button><button class="access" type="button" [title]="'usuarios.resetAccessTitle' | translate" [disabled]="readOnly() || isUserPending(user)" [attr.aria-label]="'usuarios.resetAccessAria' | translate:{ name: user.name }" (click)="requestResetAccess(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="3"/><path d="M10.2 12.8 19 4m-3 0h3v3m-7.7 7.7 2 2"/></svg></button><button class="status-action" type="button" [title]="'usuarios.toggleStatusTitle' | translate" [disabled]="readOnly() || isUserPending(user)" [attr.aria-label]="(user.status === 'Activo' ? 'usuarios.deactivateAria' : 'usuarios.activateAria') | translate:{ name: user.name }" (click)="requestStatusChange(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2M18 9V5h-4M6 15v4h4"/></svg></button><button class="danger" type="button" [title]="'usuarios.deleteTitle' | translate" [disabled]="readOnly() || isUserPending(user)" [attr.aria-label]="'usuarios.deleteAria' | translate:{ name: user.name }" (click)="requestDelete(user, $event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M9 7V4h6v3m-9 0 1 14h10l1-14"/></svg></button></div></td>
         </tr>
       </tbody>
-      <tbody *ngIf="isLoading"><tr><td class="empty-state" colspan="5"><strong>{{ 'usuarios.loadingTitle' | translate }}</strong><p>{{ 'usuarios.loadingDesc' | translate }}</p></td></tr></tbody>
-      <tbody *ngIf="loadError"><tr><td class="empty-state" colspan="5" role="alert"><strong>{{ 'usuarios.loadErrorTitle' | translate }}</strong><p>{{ loadError }}</p><button class="ghost-button" type="button" (click)="retryLoad()">{{ 'usuarios.retry' | translate }}</button></td></tr></tbody>
       <tbody *ngIf="isCompletelyEmpty"><tr><td class="empty-state" colspan="5"><strong>{{ 'usuarios.emptyTitle' | translate }}</strong><p>{{ 'usuarios.emptyDesc' | translate }}</p><button class="ghost-button" type="button" [disabled]="readOnly()" (click)="startCreate($event)">{{ 'usuarios.addButton' | translate }}</button></td></tr></tbody>
       <tbody *ngIf="isFilteredEmpty"><tr><td class="empty-state" colspan="5"><strong>{{ 'usuarios.filteredEmptyTitle' | translate }}</strong><p>{{ 'usuarios.filteredEmptyDesc' | translate }}</p><button class="ghost-button" type="button" (click)="clearFilters()">{{ 'usuarios.viewAll' | translate }}</button></td></tr></tbody>
     </table>
@@ -101,7 +99,7 @@
 
   <!-- Modal Formulario -->
   <div class="dialog-backdrop" *ngIf="showForm" (click)="closeForm()">
-    <section #userFormDialog class="confirm-dialog form-dialog" role="dialog" aria-modal="true" aria-labelledby="user-form-title" aria-describedby="user-form-description" tabindex="-1" (click)="$event.stopPropagation()">
+    <section #userFormDialog class="confirm-dialog form-dialog" role="dialog" aria-modal="true" aria-labelledby="user-form-title" aria-describedby="user-form-description" tabindex="-1" appDialog (dialogEscape)="closeForm()" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <div>
           <h2 id="user-form-title">{{ (editingUserId === null ? 'usuarios.newUserTitle' : 'usuarios.editTitle') | translate }}</h2>
@@ -152,7 +150,7 @@
 
   <!-- Modal Restablecer Acceso -->
   <div class="dialog-backdrop" *ngIf="pendingResetAccess" (click)="cancelResetAccess()">
-    <section #resetAccessDialog class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-access-dialog-title" aria-describedby="reset-access-dialog-description" tabindex="-1" (click)="$event.stopPropagation()">
+    <section #resetAccessDialog class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-access-dialog-title" aria-describedby="reset-access-dialog-description" tabindex="-1" appDialog (dialogEscape)="cancelResetAccess()" (click)="$event.stopPropagation()">
       <div class="alert-dialog-header">
         <div class="dialog-icon reset-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="3"/><path d="M10.2 12.8 19 4m-3 0h3v3m-7.7 7.7 2 2"/></svg>
@@ -175,7 +173,7 @@
 
   <!-- Modal Cambio de Estado -->
   <div class="dialog-backdrop" *ngIf="pendingStatusChange" (click)="cancelStatusChange()">
-    <section #statusDialog class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="status-dialog-title" aria-describedby="status-dialog-description" tabindex="-1" (click)="$event.stopPropagation()">
+    <section #statusDialog class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="status-dialog-title" aria-describedby="status-dialog-description" tabindex="-1" appDialog (dialogEscape)="cancelStatusChange()" (click)="$event.stopPropagation()">
       <div class="alert-dialog-header">
         <div class="dialog-icon" [class.danger-icon]="pendingStatusChange.status === 'Activo'" [class.activate-icon]="pendingStatusChange.status === 'Inactivo'" aria-hidden="true">
           <svg *ngIf="pendingStatusChange.status === 'Activo'" viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/></svg>
@@ -199,7 +197,7 @@
 
   <!-- Modal Eliminar -->
   <div class="dialog-backdrop" *ngIf="pendingDeletion" (click)="cancelDelete()">
-    <section #deleteDialog class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description" tabindex="-1" (click)="$event.stopPropagation()">
+    <section #deleteDialog class="confirm-dialog alert-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description" tabindex="-1" appDialog (dialogEscape)="cancelDelete()" (click)="$event.stopPropagation()">
       <div class="alert-dialog-header">
         <div class="dialog-icon danger-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>

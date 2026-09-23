@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, ElementRef, HostListener, Input, ViewChild, computed, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild, computed, inject } from '@angular/core';
 import { ToastService } from '../../shared/toast/toast.service';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 import { TranslationService } from '../../shared/i18n/translation.service';
 import { AppDatePipe, todayInTimezone } from '../../shared/format/app-date.pipe';
 import { initialsFrom } from '../../shared/format/initials';
 import { SettingsService } from '../../settings/settings.service';
+import { DialogDirective } from '../../shared/dialog/dialog.directive';
 
 export type UserRole = 'Admin' | 'Analista';
 export type UserStatus = 'Activo' | 'Inactivo';
@@ -29,10 +30,18 @@ export interface UserDraft {
   role: UserRole;
 }
 
+/** Datos de ejemplo (no hay backend). Devuelve copias nuevas: la vista modifica los objetos al editar. */
+export function createInitialUsers(): User[] {
+  return [
+    { id: 1, name: 'SENA Admin', email: 'admin@tdo.gov.co', password: 'Admin*Password2026', role: 'Admin', status: 'Activo', date: '24/08/2026', initials: 'SA' },
+    { id: 2, name: 'Analista TDO', email: 'analista@tdo.gov.co', password: 'Analista*Password2026', role: 'Analista', status: 'Activo', date: '24/08/2026', initials: 'AT' },
+  ];
+}
+
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe, DialogDirective],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.css'
 })
@@ -46,10 +55,14 @@ export class UsuariosComponent {
   @ViewChild('userFormDialog') userFormDialog?: ElementRef<HTMLElement>;
   @ViewChild('userNameInput') userNameInput?: ElementRef<HTMLInputElement>;
 
-  @Input() users: User[] = [
-    { id: 1, name: 'SENA Admin', email: 'admin@tdo.gov.co', password: 'Admin*Password2026', role: 'Admin', status: 'Activo', date: '24/08/2026', initials: 'SA' },
-    { id: 2, name: 'Analista TDO', email: 'analista@tdo.gov.co', password: 'Analista*Password2026', role: 'Analista', status: 'Activo', date: '24/08/2026', initials: 'AT' },
-  ];
+  @Input() users: User[] = createInitialUsers();
+
+  /**
+   * Avisa al padre cada vez que la lista cambia de referencia (alta/baja),
+   * para usar `[(users)]`: sin esto, al salir a Perfil y volver, esta vista
+   * se recrea con la lista original del padre y se pierden altas y bajas.
+   */
+  @Output() readonly usersChange = new EventEmitter<User[]>();
 
   private readonly toastService = inject(ToastService);
   private readonly translationService = inject(TranslationService);
@@ -65,8 +78,6 @@ export class UsuariosComponent {
   selectedRole = 'Todos';
   selectedStatus = 'Todos';
   showForm = false;
-  isLoading = false;
-  loadError = '';
   formError = '';
   editingUserId: number | null = null;
   isFormPending = false;
@@ -108,11 +119,11 @@ export class UsuariosComponent {
   }
 
   get isFilteredEmpty() {
-    return !this.isLoading && !this.loadError && !this.filteredUsers.length && this.hasActiveFilters;
+    return !this.filteredUsers.length && this.hasActiveFilters;
   }
 
   get isCompletelyEmpty() {
-    return !this.isLoading && !this.loadError && !this.users.length && !this.hasActiveFilters;
+    return !this.users.length && !this.hasActiveFilters;
   }
 
   countBy(field: 'role' | 'status', value: string) {
@@ -160,16 +171,6 @@ export class UsuariosComponent {
     }
   }
 
-  retryLoad() {
-    this.isLoading = true;
-    this.loadError = '';
-
-    setTimeout(() => {
-      this.isLoading = false;
-      this.emitNotice(this.translationService.translate('usuarios.toastListUpdated'));
-    }, 250);
-  }
-
   isUserPending(user: User) {
     return this.pendingUserIds.has(user.id);
   }
@@ -196,7 +197,8 @@ export class UsuariosComponent {
 
     this.editingUserId = user.id;
     this.formError = '';
-    this.formUser = { name: user.name, email: user.email, password: user.password || '', role: user.role };
+    // La contraseña actual nunca se precarga: vacío = se conserva (como indica el campo).
+    this.formUser = { name: user.name, email: user.email, password: '', role: user.role };
     this.openForm(event);
   }
 
@@ -255,7 +257,7 @@ export class UsuariosComponent {
             date: todayInTimezone(this.settingsService.draft().timezone),
             initials: initialsFrom(name),
           };
-          this.users = [...this.users, user];
+          this.setUsers([...this.users, user]);
           this.emitNotice(this.translationService.translate('usuarios.toastUserCreated', { name: user.name }));
         } else {
           const user = this.users.find((item) => item.id === this.editingUserId);
@@ -383,7 +385,7 @@ export class UsuariosComponent {
     this.pendingUserIds = new Set(this.pendingUserIds).add(user.id);
     setTimeout(() => {
       try {
-        this.users = this.users.filter((item) => item.id !== user.id);
+        this.setUsers(this.users.filter((item) => item.id !== user.id));
         this.emitNotice(this.translationService.translate('usuarios.toastUserDeleted', { name: user.name }));
         this.pendingDeletion = null;
       } catch (error) {
@@ -442,6 +444,11 @@ export class UsuariosComponent {
         this.pendingUserIds = pendingUserIds;
       }
     }, 250);
+  }
+
+  private setUsers(users: User[]) {
+    this.users = users;
+    this.usersChange.emit(users);
   }
 
   private emptyUserDraft(): UserDraft {
