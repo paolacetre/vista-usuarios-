@@ -5,6 +5,7 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 import { TranslationService } from '../../shared/i18n/translation.service';
 import { AppDatePipe, todayInTimezone } from '../../shared/format/app-date.pipe';
+import { initialsFrom } from '../../shared/format/initials';
 import { SettingsService } from '../../settings/settings.service';
 
 export type UserRole = 'Admin' | 'Analista';
@@ -252,7 +253,7 @@ export class UsuariosComponent {
             role: this.formUser.role,
             status: 'Activo',
             date: todayInTimezone(this.settingsService.draft().timezone),
-            initials: this.initialsFor(name),
+            initials: initialsFrom(name),
           };
           this.users = [...this.users, user];
           this.emitNotice(this.translationService.translate('usuarios.toastUserCreated', { name: user.name }));
@@ -265,7 +266,7 @@ export class UsuariosComponent {
             name,
             email,
             role: this.formUser.role,
-            initials: this.initialsFor(name)
+            initials: initialsFrom(name)
           };
           if (password) {
             updatedUser.password = password;
@@ -449,10 +450,6 @@ export class UsuariosComponent {
 
   private nextUserId() {
     return this.users.reduce((highestId, user) => Math.max(highestId, user.id), 0) + 1;
-  }
-
-  private initialsFor(name: string) {
-    return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
   }
 
   /** Mínimo 8 caracteres, con al menos una mayúscula, una minúscula y un número. */

@@ -54,12 +54,12 @@
   color: #F1F1F1;
 }
 
+/* Una sola línea y sin barra de desplazamiento (no lleva overflow-x). */
 .settings-tabs {
   flex-shrink: 0;
   display: flex;
   flex-wrap: nowrap;
   gap: 2px;
-  overflow-x: auto;
   border-bottom: 1px solid #D4D4D4;
   margin-bottom: 10px;
   padding: 0 2px;
@@ -114,6 +114,8 @@
   border-bottom-color: #1FACE3;
 }
 
+/* Ícono decorativo, no texto: queda fuera de la escala 26/20/16 para que
+   las 6 pestañas quepan en una sola línea. */
 .tab-icon {
   font-size: 12px;
   line-height: 1;

@@ -12,7 +12,6 @@ export interface ProfileData {
   email: string;
   role: string;
   entity: string;
-  regional?: string;
   dateJoined: string;
   photoUrl: string;
 }

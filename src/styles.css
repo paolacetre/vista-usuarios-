@@ -1,5 +1,5 @@
-/* Sistema visual: Figma "Ecosistema visual nivel fábrica". Solo Work Sans. */
-@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap');
+/* Sistema visual: Figma "Ecosistema visual nivel fábrica". Solo Work Sans
+   (400/600, cargada una sola vez desde index.html). */
 
 :root {
   /* Brand Colors. `--primary-color` / `--accent-color` los reemplaza ThemeService

@@ -171,4 +171,35 @@ describe('AppearanceTabComponent', () => {
     component.applyGlobalColor(matches[0], 'primary');
     expect(component.form.controls.primaryColor.value.toLowerCase()).toBe('#123abc');
   }));
+
+  it('should allow a second search and apply right after applying a color, without saving first', fakeAsync(() => {
+    component.onColorQueryChange('coral');
+    tick(PAST_COLOR_SEARCH_DEBOUNCE_MS);
+    component.applyGlobalColor(component.globalColorMatches()[0], 'primary');
+    expect(component.colorDropdownOpen).toBeFalse();
+
+    component.onColorQueryChange('roxo');
+    expect(component.colorDropdownOpen).toBeTrue();
+    tick(PAST_COLOR_SEARCH_DEBOUNCE_MS);
+    const matches = component.globalColorMatches();
+    expect(matches[0].color.toLowerCase()).toBe('#800080');
+
+    component.applyGlobalColor(matches[0], 'accent');
+    expect(component.form.controls.primaryColor.value.toLowerCase()).toBe('#ff7f50');
+    expect(component.form.controls.accentColor.value.toLowerCase()).toBe('#800080');
+  }));
+
+  it('should find the same term again when typed quickly right after applying it', fakeAsync(() => {
+    component.onColorQueryChange('coral');
+    tick(PAST_COLOR_SEARCH_DEBOUNCE_MS);
+    component.applyGlobalColor(component.globalColorMatches()[0], 'primary');
+
+    // Se vuelve a escribir antes de que termine el debounce del '' de la limpieza.
+    tick(50);
+    component.onColorQueryChange('coral');
+    tick(PAST_COLOR_SEARCH_DEBOUNCE_MS);
+
+    expect(component.globalColorMatches().length).toBeGreaterThan(0);
+    expect(component.colorDropdownOpen).toBeTrue();
+  }));
 });

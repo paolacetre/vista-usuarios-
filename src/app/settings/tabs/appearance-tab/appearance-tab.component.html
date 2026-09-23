@@ -120,6 +120,7 @@
             [placeholder]="'appearance.colorSearchPlaceholder' | translate"
             [attr.aria-label]="'appearance.colorSearchAria' | translate"
             (focus)="onColorSearchFocus()"
+            (click)="onColorSearchFocus()"
             (blur)="colorDropdownOpen = false">
           <button *ngIf="colorQuery.trim()" type="button" class="color-search-clear" (mousedown)="$event.preventDefault()" (click)="onColorQueryChange('')" [attr.aria-label]="'appearance.colorSearchClearAria' | translate">×</button>
         </label>

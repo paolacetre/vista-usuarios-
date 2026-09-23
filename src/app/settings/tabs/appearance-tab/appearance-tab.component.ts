@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { SettingsService } from '../../settings.service';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 import { TranslationService } from '../../../shared/i18n/translation.service';
@@ -81,7 +81,7 @@ export class AppearanceTabComponent {
    * - `colorQuery` (campo plano) sigue el input tecla por tecla, sin demora
    *   visual — es puramente estado LOCAL de la búsqueda.
    * - `colorQuery$` → `debouncedQuery` (signal) es quien alimenta el filtrado
-   *   real, con `debounceTime` + `distinctUntilChanged`: el catálogo (~70
+   *   real, con `debounceTime`: el catálogo (~70
    *   colores) solo se recorre una vez que el usuario hace una pausa al
    *   escribir, no en cada pulsación.
    * `globalColorMatches` es un `computed()`, no un método: Angular solo lo
@@ -124,8 +124,12 @@ export class AppearanceTabComponent {
 
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => this.settings.updateDraft(value));
 
+    // Sin distinctUntilChanged: applyGlobalColor() limpia `debouncedQuery`
+    // por fuera de este pipeline, así que su "último valor emitido" puede
+    // quedar desfasado (p. ej. sigue en "coral") y bloquear una segunda
+    // búsqueda del mismo término. El signal ya ignora valores repetidos.
     this.colorQuery$
-      .pipe(debounceTime(COLOR_SEARCH_DEBOUNCE_MS), distinctUntilChanged(), takeUntilDestroyed())
+      .pipe(debounceTime(COLOR_SEARCH_DEBOUNCE_MS), takeUntilDestroyed())
       .subscribe((value) => this.debouncedQuery.set(value));
   }
 
@@ -153,10 +157,21 @@ export class AppearanceTabComponent {
     return entry.nameEs;
   }
 
-  /** Cada tecla actualiza el input al instante; solo el filtrado real se debounce. */
+  /**
+   * Cada tecla actualiza el input al instante; solo el filtrado real se debounce.
+   * Reabre el desplegable al escribir: tras aplicar un color, el input nunca
+   * pierde el foco (el dropdown y sus botones usan mousedown/preventDefault
+   * para no quitárselo), así que el evento nativo `focus` no vuelve a
+   * dispararse por sí solo. Sin esto, `colorDropdownOpen` se queda en false
+   * después de aplicar el primer color y una segunda búsqueda no se ve,
+   * aunque los resultados ya estén calculados.
+   */
   onColorQueryChange(value: string): void {
     this.colorQuery = value;
     this.colorQuery$.next(value);
+    if (value.trim()) {
+      this.colorDropdownOpen = true;
+    }
   }
 
   /**
@@ -220,6 +235,7 @@ export class AppearanceTabComponent {
     return entry.id;
   }
 
+  /** También se llama en (click): tras aplicar un color el input conserva el foco y `focus` no vuelve a dispararse. */
   onColorSearchFocus(): void {
     this.colorDropdownOpen = true;
   }

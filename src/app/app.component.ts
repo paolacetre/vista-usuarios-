@@ -8,6 +8,7 @@ import { ToastContainerComponent } from './shared/toast/toast-container.componen
 import { ToastService } from './shared/toast/toast.service';
 import { TranslatePipe } from './shared/i18n/translate.pipe';
 import { TranslationService } from './shared/i18n/translation.service';
+import { initialsFrom } from './shared/format/initials';
 
 @Component({
   selector: 'app-root',
@@ -103,7 +104,7 @@ export class AppComponent implements OnInit {
     if (adminUser) {
       adminUser.name = updated.name;
       adminUser.email = updated.email;
-      adminUser.initials = updated.name.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+      adminUser.initials = initialsFrom(updated.name);
     }
   }
 }
