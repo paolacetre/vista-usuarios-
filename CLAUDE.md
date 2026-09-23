@@ -1,37 +1,42 @@
-# CLAUDE.md
+## Comandos
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+- `ng serve` / `npm start`: servidor de desarrollo en `http://localhost:4200/` con recarga automática.
+- `ng build`: build de producción, con salida en `dist/gestion-usuarios/`.
+- `ng build --watch --configuration development` / `npm run watch`: build de desarrollo que se recompila al guardar.
+- `ng test`: pruebas unitarias con Karma/Jasmine (lanzador de Chrome; por defecto queda observando cambios).
+- `ng test --watch=false`: una sola ejecución, útil para verificaciones tipo CI.
+- `ng test --include='**/usuarios.component.spec.ts'`: ejecuta un solo archivo de pruebas.
+- `ng generate component views/<nombre>`: crea una vista standalone nueva con el estilo actual (ver Arquitectura).
 
-## Commands
+No hay script de lint configurado ni framework de pruebas e2e.
 
-- `ng serve` / `npm start` — run the dev server at `http://localhost:4200/` with live reload.
-- `ng build` — production build, output to `dist/gestion-usuarios/`.
-- `ng build --watch --configuration development` / `npm run watch` — dev build with rebuild on change.
-- `ng test` — run unit tests via Karma/Jasmine (Chrome launcher; watches by default).
-- `ng test --watch=false` — single run, useful for CI-style checks.
-- `ng test --include='**/usuarios.component.spec.ts'` — run a single spec file.
-- `ng generate component views/<name>` — scaffold a new standalone view component in the existing style (see Architecture below).
+## Arquitectura
 
-There is no lint script configured and no e2e framework set up.
+Aplicación Angular 19 con componentes standalone (sin NgModules ni router) llamada `gestion-usuarios`. Es un panel de administración de una sola página ("Tendencias Ocupacionales" / SENA) con tres vistas que se alternan manualmente mediante un campo de texto.
 
-## Architecture
+**Cambio de vista sin router.** `AppComponent` (`src/app/app.component.ts`) tiene `currentView: 'usuarios' | 'perfil' | 'configuracion'` y decide con `*ngIf` en `app.component.html` qué componente hijo se muestra. `switchView()` cambia la vista activa. `configuracion` es un caso especial: se muestra como un modal superpuesto (`configurationOpen`) en lugar de reemplazar el contenido principal, así que `usuarios` sigue montado debajo. Cerrar el modal (X, clic fuera o Esc) llama a `closeConfiguration()`, que descarta el borrador de configuración sin guardar.
 
-This is an Angular 19 standalone-components app (no NgModules, no router) named `gestion-usuarios`. It's a single-page admin shell ("Tendencias Ocupacionales" / SENA) with three views swapped manually via a string field.
+**Estado.** Los usuarios y el perfil viven en `AppComponent` (`users`, `profileUser`), inicializados con `createInitialUsers()` / `createInitialProfile()`, que se exportan desde los archivos de cada vista. `UsuariosComponent` se enlaza con `[(users)]`: emite `usersChange` cada vez que reemplaza la lista (crear/eliminar), mientras que las ediciones y los cambios de estado modifican los mismos objetos de usuario. `PerfilComponent` recibe `[profile]` y emite `profileSaved` / `cancel`. La configuración del sistema vive en `SettingsService` (signals), no en `AppComponent`.
 
-**View switching, not routing.** `AppComponent` (`src/app/app.component.ts`) owns `currentView: 'usuarios' | 'perfil' | 'configuracion'` and toggles which child component is shown with `*ngIf` in `app.component.html`. `switchView()` changes the active view; `configuracion` is special-cased to render as a modal overlay (`configurationOpen`) rather than replacing the main content, so `usuarios` stays mounted underneath it. Closing the overlay (X, backdrop click or Esc) calls `closeConfiguration()`, which discards the unsaved settings draft.
+**Vistas.** Están en `src/app/views/<nombre>/` (`usuarios`, `perfil`). Cada una es un componente standalone con sus propios `.ts`/`.html`/`.css`/`.spec.ts` y usa formularios template-driven (`FormsModule`). Cada archivo de vista exporta además sus tipos de dominio (`User`, `UserDraft`, `UserRole` en `usuarios.component.ts`; `ProfileData` en `perfil.component.ts`): los tipos se importan directamente desde ese archivo.
 
-**State.** Users and profile live in `AppComponent` (`users`, `profileUser`), seeded by `createInitialUsers()` / `createInitialProfile()` exported from the view files. `UsuariosComponent` is bound with `[(users)]`: it emits `usersChange` whenever it replaces the list (create/delete), while edits and status changes mutate the same user objects. `PerfilComponent` gets `[profile]` and emits `profileSaved` / `cancel`. System settings live in `SettingsService` (signals), not in `AppComponent`.
+**Configuración.** Está en `src/app/settings/`: `SettingsComponent` (pestañas con patrón tablist, vista previa en vivo y confirmaciones de Guardar/Restablecer) más un componente standalone por pestaña en `tabs/` (apariencia, logos, idioma, accesibilidad, preferencias, acerca de). Las pestañas usan formularios reactivos cuyos cambios van directo a `SettingsService.updateDraft()`. Sus estilos compartidos están en `_settings-shared.scss`, que cada pestaña incluye con `@use` (por eso se emite una vez por pestaña). Los tipos y las listas de opciones están en `settings.model.ts`.
 
-**Views** live under `src/app/views/<name>/` (`usuarios`, `perfil`), each a standalone component with its own `.ts`/`.html`/`.css`/`.spec.ts` using template-driven forms (`FormsModule`). Each view file also exports its domain types (`User`, `UserDraft`, `UserRole` in `usuarios.component.ts`; `ProfileData` in `perfil.component.ts`) — import types directly from the owning file.
+**Configuración: borrador vs. guardado.** `SettingsService` mantiene `saved` (persistido en `localStorage` bajo la clave `tdo_system_config`) y `draft` (lo que se está editando). Cada cambio del borrador se aplica en vivo a toda la interfaz.
+- `save()` persiste el borrador y falla con `STORAGE_FULL` si se supera la cuota de almacenamiento.
+- `discardDraft()` vuelve a lo guardado.
+- `reset()` vuelve a los valores de fábrica (`DEFAULT_SETTINGS`) y los guarda de inmediato con `save()`; no requiere pulsar "Guardar cambios".
 
-**Configuración** lives under `src/app/settings/`: `SettingsComponent` (tablist, live preview, save/reset confirmations) plus one standalone component per tab in `tabs/` (appearance, logos, language, accessibility, preferences, about). Tabs use reactive forms whose changes go straight to `SettingsService.updateDraft()`; their shared styles are in `_settings-shared.scss` (pulled into each tab with `@use`, so it is emitted once per tab). Types and option lists live in `settings.model.ts`.
+`ThemeService` es el único lugar que toca el DOM global para el tema: variables CSS (`--primary-color`, `--accent-color`, `--type-scale`, …), los atributos `data-density` / `data-high-contrast` / `data-large-icons` / `data-read-only` en `document.documentElement`, y el favicon. El modo oscuro es `draft().theme === 'oscuro'`, que se refleja como la clase `.dark-mode` en el div raíz del shell; el botón de luna de la barra superior guarda el tema directamente.
 
-**Settings: draft vs saved.** `SettingsService` keeps `saved` (persisted to `localStorage` under `tdo_system_config`) and `draft` (what is being edited). Every draft change is applied live to the whole UI; `save()` persists it (erroring with `STORAGE_FULL` if the storage quota is exceeded), `discardDraft()` reverts to `saved`, `reset()` sets the draft to factory defaults. `ThemeService` is the only place that touches the global DOM for theming: CSS variables (`--primary-color`, `--accent-color`, `--type-scale`, …), `data-density` / `data-high-contrast` / `data-large-icons` / `data-read-only` on `document.documentElement`, and the favicon. Dark mode is `draft().theme === 'oscuro'`, reflected as the `.dark-mode` class on the root shell div; the topbar moon button saves the theme directly.
+**Compartido** (`src/app/shared/`):
+- `i18n/`: `TranslationService` + pipe impuro `translate`, que lee `draft().language`. Todos los textos en es/en/pt están en `translations.ts`.
+- `toast/`: `ToastService` + contenedor e ítem.
+- `format/`: pipe `appDate` e `initialsFrom`.
+- `dialog/DialogDirective`: todo `<section role="dialog">` usa `appDialog` con `(dialogEscape)`. Mantiene el foco dentro con Tab, lo mueve al abrir y lo devuelve al cerrar, y maneja Esc sin dejar que se propague. Así un diálogo anidado (p. ej. "Guardar" dentro de Configuración) se cierra solo él.
 
-**Shared** (`src/app/shared/`): `i18n/` (`TranslationService` + impure `translate` pipe reading `draft().language`; all es/en/pt strings in `translations.ts`), `toast/` (`ToastService` + container/item), `format/` (`appDate` pipe, `initialsFrom`) and `dialog/DialogDirective`. Every `<section role="dialog">` uses `appDialog` with `(dialogEscape)`: it traps Tab, moves focus in and back out, and handles Esc without letting it bubble, so a nested dialog (e.g. "Guardar" inside Configuración) closes only itself.
+**Sin backend.** Los usuarios y el perfil son datos de ejemplo fijos que se modifican en memoria; solo la configuración se persiste (en `localStorage`). Todavía no se usa cliente HTTP.
 
-**No backend.** Users and profile are hardcoded seeds mutated in memory; only settings persist (to `localStorage`). There's no HTTP client usage yet.
+**Idioma/UX.** Los textos de la interfaz y los nombres de variables de conceptos de dominio están en español (p. ej. `switchView`, `sessionRole`, roles `Administrador`/`Analista`). Mantén el texto nuevo de la interfaz y los términos de dominio coherentes con esto.
 
-**Language/UX**: UI text, component selectors' content, and variable names for domain concepts are in Spanish (e.g. `switchView`, `sessionRole`, `Administrador`/`Analista` roles); keep new UI copy and domain terms consistent with this.
-
-**Access control** is a single hardcoded check: `AppComponent.sessionRole === 'Administrador'` gates the whole app shell in `app.component.html` (an `#restricted` template shows otherwise). There's no real auth.
+**Control de acceso.** Es una única comprobación fija: `AppComponent.sessionRole === 'Administrador'` habilita todo el shell en `app.component.html` (si no, se muestra la plantilla `#restricted`). No hay autenticación real.
